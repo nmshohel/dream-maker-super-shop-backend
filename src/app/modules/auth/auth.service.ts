@@ -13,13 +13,13 @@ import {
 } from './auth.interface';
 
 const loginUser = async (payload: ILoginUser): Promise<IUserLoginResponse> => {
-  const { mobileNo: userMobileNo, password } = payload;
+  const { email: userEmail, password } = payload;
 
   // creating user instance of User
 
   const isUserExist = await prisma.user.findUnique({
     where: {
-      mobileNo: userMobileNo,
+      email: userEmail,
     },
   });
 
@@ -49,15 +49,11 @@ const loginUser = async (payload: ILoginUser): Promise<IUserLoginResponse> => {
   //     expiresIn: config.jwt.expires_in,
   //   }
   // );
-  const { mobileNo, role, pbsCode, zonalCode, complainCode, substationCode } =
-    isUserExist;
+  console.log(isUserExist);
+  const { email, role } = isUserExist;
   const userInfo = {
-    mobileNo,
+    email,
     role,
-    zonalCode,
-    complainCode,
-    substationCode,
-    pbsCode,
   };
   const accessToken = jwtHelpers.createToken(
     userInfo,
@@ -97,11 +93,11 @@ const refreshToken = async (token: string): Promise<IRefreshTokenResponse> => {
   } catch (err) {
     throw new ApiError(httpStatus.FORBIDDEN, 'Invalid token');
   }
-  const { mobileNo } = verifyToken;
+  const { email } = verifyToken;
   // checking deleteUser refresh token
   const isUserExist = await prisma.user.findUnique({
     where: {
-      mobileNo: mobileNo,
+      email: email,
     },
   });
   if (!isUserExist) {
@@ -111,12 +107,8 @@ const refreshToken = async (token: string): Promise<IRefreshTokenResponse> => {
   // genereate token
   const newAccessToken = jwtHelpers.createToken(
     {
-      mobileNo: isUserExist.mobileNo,
+      email: isUserExist.email,
       role: isUserExist.role,
-      pbsCode: isUserExist.pbsCode,
-      zonalCode: isUserExist.zonalCode,
-      complainCode: isUserExist.complainCode,
-      substationCode: isUserExist.substationCode,
     },
     config.jwt.secret as Secret,
     config.jwt.expires_in as string

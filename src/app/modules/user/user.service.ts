@@ -22,16 +22,14 @@ const inertIntoDB = async (data: User): Promise<User> => {
 
 const getAllFromDB = async (
   filters: userFilterRequest,
-  options: IPaginationOptions,
-  pbsCode: string
+  options: IPaginationOptions
 ): Promise<IGenericResponse<User[]>> => {
   const { page, limit, skip } = paginationHelpers.calculatePagination(options);
-  // eslint-disable-next-line no-unused-vars
+  const { searchTerm, ...filterData } = filters;
+  const andConditons = [];
 
-  const { searchTerm, ...filtersData } = filters;
-  const andConditions = [];
   if (searchTerm) {
-    andConditions.push({
+    andConditons.push({
       OR: userSearchableFields.map(field => ({
         [field]: {
           contains: searchTerm,
@@ -41,32 +39,23 @@ const getAllFromDB = async (
     });
   }
 
-  if (Object.keys(filtersData).length > 0) {
-    andConditions.push({
-      AND: Object.keys(filtersData).map(key => ({
+  if (Object.keys(filterData).length > 0) {
+    andConditons.push({
+      AND: Object.keys(filterData).map(key => ({
         [key]: {
-          equals: (filtersData as any)[key],
+          equals: (filterData as any)[key],
         },
       })),
     });
   }
 
-  const whereCondition: Prisma.UserWhereInput =
-    andConditions.length > 0 ? { AND: andConditions } : {};
+  const whereConditons: Prisma.UserWhereInput =
+    andConditons.length > 0 ? { AND: andConditons } : {};
+
   const result = await prisma.user.findMany({
-    where: {
-      ...whereCondition,
-      pbsCode: pbsCode,
-    },
+    where: whereConditons,
     skip,
     take: limit,
-    include: {
-      pbs: true,
-      zonals: true,
-      complainCenter: true,
-      substation: true,
-      employee: true,
-    },
     orderBy:
       options.sortBy && options.sortOrder
         ? {
@@ -76,7 +65,9 @@ const getAllFromDB = async (
             createdAt: 'desc',
           },
   });
+
   const total = await prisma.user.count();
+
   return {
     meta: {
       total,
@@ -87,21 +78,29 @@ const getAllFromDB = async (
   };
 };
 
-const getDataById = async (mobileNo: string): Promise<User | null> => {
+const getDataById = async (id: string): Promise<User | null> => {
   const result = await prisma.user.findUnique({
     where: {
-      mobileNo: mobileNo,
+      id,
+    },
+  });
+  return result;
+};
+const deleteById = async (id: string): Promise<User | null> => {
+  const result = await prisma.user.delete({
+    where: {
+      id,
     },
   });
   return result;
 };
 const updateIntoDB = async (
-  mobileNo: string,
+  id: string,
   payload: Partial<User>
 ): Promise<User> => {
   const result = await prisma.user.update({
     where: {
-      mobileNo: mobileNo,
+      id,
     },
     data: payload,
   });
@@ -112,4 +111,5 @@ export const UserService = {
   getAllFromDB,
   getDataById,
   updateIntoDB,
+  deleteById,
 };

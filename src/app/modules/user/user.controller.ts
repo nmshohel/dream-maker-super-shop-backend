@@ -18,38 +18,47 @@ const insertIntoDB: RequestHandler = catchAsync(async (req, res) => {
 });
 
 const getAllFromDB = catchAsync(async (req, res) => {
-  const pbsCode = req.params.pbsCode;
   const filters = pick(req.query, userFilterableFields);
   const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
 
-  const result = await UserService.getAllFromDB(filters, options, pbsCode);
+  const result = await UserService.getAllFromDB(filters, options);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'User data fatched',
+    message: 'Users retrieved successfully',
     meta: result.meta,
     data: result.data,
   });
 });
 
 const getDataById = catchAsync(async (req, res) => {
-  const mobileNo = req.params.mobileNo;
-  const result = await UserService.getDataById(mobileNo);
+  const id = req.params.id;
+  const result = await UserService.getDataById(id);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'User data fatched',
+    message: 'User getched successfully',
+    data: result,
+  });
+});
+const deleteById = catchAsync(async (req, res) => {
+  const id = req.params.id;
+  const result = await UserService.deleteById(id);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'User Deleted successfully',
     data: result,
   });
 });
 const updateIntoDB = catchAsync(async (req, res) => {
-  const { mobileNo } = req.params;
+  const { id } = req.params;
   const payload = req.body;
-  const result = await UserService.updateIntoDB(mobileNo, payload);
+  const result = await UserService.updateIntoDB(id, payload);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'User Updated Successfully',
+    message: 'User updated successfully',
     data: result,
   });
 });
@@ -58,4 +67,5 @@ export const UserController = {
   getAllFromDB,
   getDataById,
   updateIntoDB,
+  deleteById,
 };
