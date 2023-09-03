@@ -8,7 +8,9 @@ import { OrderFilterableFields } from './order.constrant';
 import { OrderService } from './order.service';
 
 const insertIntoDB: RequestHandler = catchAsync(async (req, res) => {
-  const result = await OrderService.insertIntoDB(req.body, req.user);
+  const data = req.body;
+  const requestUser = req.user;
+  const result = await OrderService.insertIntoDB(data, requestUser);
   sendResponse<Order>(res, {
     statusCode: httpStatus.OK,
     success: true,

@@ -26,68 +26,22 @@ const insertIntoDB = async (data: any, requestUser: any): Promise<any> => {
   const result = await prisma.order.create({
     data: orderedUser,
   });
-  return result;
+
+  const { orderedBooks } = data;
+  for (let index = 0; index < orderedBooks.length; index++) {
+    console.log(orderedBooks[index].bookId);
+    const createOrder = await prisma.orderedBook.create({
+      data: {
+        orderId: result.id,
+        bookId: orderedBooks[index].bookId,
+        quantity: orderedBooks[index].bookId,
+      },
+    });
+  }
+
+  const { id, userId, status, createdAt } = result;
+  return { id, userId, orderedBooks, status, createdAt };
 };
-
-// const insertIntoDB = async (data: any, requestUser: any): Promise<any> => {
-
-//   const getUser = await prisma.user.findUnique({
-//     where: {
-//       email: requestUser.email,
-//     },
-//   });
-//   console.log('get User', getUser?.id);
-
-//   const orderedUser = {
-//     userId: getUser?.id,
-//   };
-//   const result = await prisma.order.create({
-//     data: orderedUser,
-//   });
-// return result;
-// const newCourse = await prisma.$transaction(async transactionClient => {
-//   const result = await transactionClient.order.create({
-//     data: courseData,
-//   });
-//   if (!result) {
-//     throw new ApiError(httpStatus.BAD_REQUEST, 'Unable to create course');
-//   }
-//   if (preRequisiteCourses && preRequisiteCourses.length > 0) {
-//     for (let index = 0; index < preRequisiteCourses.length; index++) {
-//       const createPrerequisite =
-//         await transactionClient.courseToPrerequisite.create({
-//           data: {
-//             courseId: result.id,
-//             preRequisiteId: preRequisiteCourses[index].courseId,
-//           },
-//         });
-//       console.log(createPrerequisite);
-//     }
-//   }
-//   return result;
-// });
-// if (newCourse) {
-//   const responseData = await prisma.course.findUnique({
-//     where: {
-//       id: newCourse.id,
-//     },
-//     include: {
-//       preRequisite: {
-//         include: {
-//           preRequisite: true,
-//         },
-//       },
-//       preRequisiteFor: {
-//         include: {
-//           course: true,
-//         },
-//       },
-//     },
-//   });
-//   return responseData;
-// }
-// throw new ApiError(httpStatus.BAD_REQUEST, 'Unable to create course');
-// };
 
 const getAllFromDB = async (
   filters: OrderFilterRequest,
