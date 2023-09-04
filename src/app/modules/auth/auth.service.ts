@@ -13,15 +13,40 @@ import {
   IUserLoginResponse,
 } from './auth.interface';
 
-const insertIntoDB = async (data: User): Promise<User> => {
-  data.password = await bcrypt.hash(
-    data.password,
-    Number(config.bycrypt_salt_rounds)
-  );
-  const result = prisma.user.create({
-    data: data,
-  });
-  return result;
+const insertIntoDB = async (data: User): Promise<any> => {
+  try {
+    data.password = await bcrypt.hash(
+      data.password,
+      Number(config.bycrypt_salt_rounds)
+    );
+
+    const result = await prisma.user.create({
+      data: data,
+    });
+
+    return {
+      success: true,
+      statusCode: 200,
+      message: 'User created successfully!',
+      data: {
+        id: result.id,
+        name: result.name,
+        email: result.email,
+        role: result.role,
+        contactNo: result.contactNo,
+        address: result.address,
+        profileImg: result.profileImg,
+      },
+    };
+  } catch (error) {
+    // Handle any errors here
+    return {
+      success: false,
+      statusCode: 500, // or any appropriate error code
+      message: 'Error creating user',
+      data: null,
+    };
+  }
 };
 
 const loginUser = async (payload: ILoginUser): Promise<IUserLoginResponse> => {
