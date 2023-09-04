@@ -19,11 +19,11 @@ const getAllFromDB = async (
   options: IPaginationOptions
 ): Promise<IGenericResponse<Book[]>> => {
   const { page, limit, skip } = paginationHelpers.calculatePagination(options);
-  const { searchTerm, ...filterData } = filters;
-  const andConditons = [];
+  const { searchTerm, minPrice, maxPrice, ...filterData } = filters; // Add minPrice and maxPrice
+  const andConditions = [];
 
   if (searchTerm) {
-    andConditons.push({
+    andConditions.push({
       OR: BookSearchableFields.map(field => ({
         [field]: {
           contains: searchTerm,
@@ -33,8 +33,25 @@ const getAllFromDB = async (
     });
   }
 
+  // Add conditions for minPrice and maxPrice, converting them to Float
+  if (minPrice !== undefined) {
+    andConditions.push({
+      price: {
+        gte: parseFloat(minPrice), // Convert to Float
+      },
+    });
+  }
+
+  if (maxPrice !== undefined) {
+    andConditions.push({
+      price: {
+        lte: parseFloat(maxPrice), // Convert to Float
+      },
+    });
+  }
+
   if (Object.keys(filterData).length > 0) {
-    andConditons.push({
+    andConditions.push({
       AND: Object.keys(filterData).map(key => ({
         [key]: {
           equals: (filterData as any)[key],
@@ -43,11 +60,11 @@ const getAllFromDB = async (
     });
   }
 
-  const whereConditons: Prisma.BookWhereInput =
-    andConditons.length > 0 ? { AND: andConditons } : {};
+  const whereConditions: Prisma.BookWhereInput =
+    andConditions.length > 0 ? { AND: andConditions } : {};
 
   const result = await prisma.book.findMany({
-    where: whereConditons,
+    where: whereConditions,
     skip,
     take: limit,
     orderBy:
