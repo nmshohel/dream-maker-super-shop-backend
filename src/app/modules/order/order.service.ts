@@ -23,25 +23,29 @@ const insertIntoDB = async (data: any, requestUser: any): Promise<any> => {
     userId: getUser.id,
   };
 
-  const result = await prisma.order.create({
-    data: orderedUser,
+  let result;
+
+  await prisma.$transaction(async transactionClient => {
+    result = await transactionClient.order.create({
+      data: orderedUser,
+    });
+
+    const { orderedBooks } = data;
+    for (let index = 0; index < orderedBooks.length; index++) {
+      console.log(orderedBooks[index].bookId);
+      // eslint-disable-next-line no-unused-vars
+      const createOrder = await transactionClient.orderedBook.create({
+        data: {
+          orderId: result.id,
+          bookId: orderedBooks[index].bookId,
+          quantity: String(orderedBooks[index].quantity),
+        },
+      });
+    }
   });
 
-  const { orderedBooks } = data;
-  for (let index = 0; index < orderedBooks.length; index++) {
-    console.log(orderedBooks[index].bookId);
-    // eslint-disable-next-line no-unused-vars
-    const createOrder = await prisma.orderedBook.create({
-      data: {
-        orderId: result.id,
-        bookId: orderedBooks[index].bookId,
-        quantity: orderedBooks[index].bookId,
-      },
-    });
-  }
-
   const { id, userId, status, createdAt } = result;
-  return { id, userId, orderedBooks, status, createdAt };
+  return { id, userId, orderedBooks: data.orderedBooks, status, createdAt };
 };
 
 const getAllFromDB = async (
