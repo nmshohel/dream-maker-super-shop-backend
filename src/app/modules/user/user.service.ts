@@ -1,24 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Prisma, User } from '@prisma/client';
-import bcrypt from 'bcrypt';
-import config from '../../../config';
 import { paginationHelpers } from '../../../helpers/paginationHelper';
 import { IGenericResponse } from '../../../interfaces/common';
 import { IPaginationOptions } from '../../../interfaces/pagination';
 import prisma from '../../../shared/prisma';
 import { userSearchableFields } from './user.constrant';
 import { userFilterRequest } from './user.interface';
-const inertIntoDB = async (data: User): Promise<User> => {
-  data.password = await bcrypt.hash(
-    data.password,
-    Number(config.bycrypt_salt_rounds)
-  );
-  const result = prisma.user.create({
-    data: data,
-  });
-  return result;
-};
 
 const getAllFromDB = async (
   filters: userFilterRequest,
@@ -107,7 +95,6 @@ const updateIntoDB = async (
   return result;
 };
 export const UserService = {
-  inertIntoDB,
   getAllFromDB,
   getDataById,
   updateIntoDB,

@@ -1,6 +1,7 @@
 import httpStatus from 'http-status';
 import ApiError from '../../../errors/ApiError';
 // import { User } from '../user/user.model';
+import { User } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { Secret } from 'jsonwebtoken';
 import config from '../../../config';
@@ -11,6 +12,17 @@ import {
   IRefreshTokenResponse,
   IUserLoginResponse,
 } from './auth.interface';
+
+const insertIntoDB = async (data: User): Promise<User> => {
+  data.password = await bcrypt.hash(
+    data.password,
+    Number(config.bycrypt_salt_rounds)
+  );
+  const result = prisma.user.create({
+    data: data,
+  });
+  return result;
+};
 
 const loginUser = async (payload: ILoginUser): Promise<IUserLoginResponse> => {
   const { email: userEmail, password } = payload;
@@ -121,4 +133,5 @@ const refreshToken = async (token: string): Promise<IRefreshTokenResponse> => {
 export const AuthService = {
   loginUser,
   refreshToken,
+  insertIntoDB,
 };
