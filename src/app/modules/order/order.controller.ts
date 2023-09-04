@@ -20,10 +20,11 @@ const insertIntoDB: RequestHandler = catchAsync(async (req, res) => {
 });
 
 const getAllFromDB = catchAsync(async (req, res) => {
+  const requestUser = req.user;
   const filters = pick(req.query, OrderFilterableFields);
   const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
 
-  const result = await OrderService.getAllFromDB(filters, options);
+  const result = await OrderService.getAllFromDB(filters, options, requestUser);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -35,7 +36,8 @@ const getAllFromDB = catchAsync(async (req, res) => {
 
 const getDataById = catchAsync(async (req, res) => {
   const id = req.params.id;
-  const result = await OrderService.getDataById(id);
+  const requestUser = req.user;
+  const result = await OrderService.getDataById(id, requestUser);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

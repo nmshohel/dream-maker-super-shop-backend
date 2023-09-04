@@ -30,6 +30,7 @@ const insertIntoDB = async (data: any, requestUser: any): Promise<any> => {
   const { orderedBooks } = data;
   for (let index = 0; index < orderedBooks.length; index++) {
     console.log(orderedBooks[index].bookId);
+    // eslint-disable-next-line no-unused-vars
     const createOrder = await prisma.orderedBook.create({
       data: {
         orderId: result.id,
@@ -45,14 +46,29 @@ const insertIntoDB = async (data: any, requestUser: any): Promise<any> => {
 
 const getAllFromDB = async (
   filters: OrderFilterRequest,
-  options: IPaginationOptions
+  options: IPaginationOptions,
+  requestUser: any
 ): Promise<IGenericResponse<Order[]>> => {
+  // console.log('request user:', requestUser);
   const { page, limit, skip } = paginationHelpers.calculatePagination(options);
   const { searchTerm, ...filterData } = filters;
-  const andConditons = [];
+  const andConditions = [];
+  const getUser = await prisma.user.findUnique({
+    where: {
+      email: requestUser.email,
+    },
+  });
+  console.log('get user----------------------', getUser);
+  if (requestUser.role === 'admin') {
+    // Admins can access all data, so no additional condition needed.
+  } else {
+    andConditions.push({
+      userId: getUser?.id,
+    });
+  }
 
   if (searchTerm) {
-    andConditons.push({
+    andConditions.push({
       OR: OrderSearchableFields.map(field => ({
         [field]: {
           contains: searchTerm,
@@ -63,7 +79,7 @@ const getAllFromDB = async (
   }
 
   if (Object.keys(filterData).length > 0) {
-    andConditons.push({
+    andConditions.push({
       AND: Object.keys(filterData).map(key => ({
         [key]: {
           equals: (filterData as any)[key],
@@ -72,11 +88,11 @@ const getAllFromDB = async (
     });
   }
 
-  const whereConditons: Prisma.OrderWhereInput =
-    andConditons.length > 0 ? { AND: andConditons } : {};
+  const whereConditions: Prisma.OrderWhereInput =
+    andConditions.length > 0 ? { AND: andConditions } : {};
 
   const result = await prisma.order.findMany({
-    where: whereConditons,
+    where: whereConditions,
     skip,
     take: limit,
     orderBy:
@@ -101,7 +117,11 @@ const getAllFromDB = async (
   };
 };
 
-const getDataById = async (id: string): Promise<Order | null> => {
+const getDataById = async (
+  id: string,
+  requestUser: any
+): Promise<Order | null> => {
+  console.log('requestUser', requestUser);
   const result = await prisma.order.findUnique({
     where: {
       id,

@@ -5,8 +5,12 @@ import { OrderController } from './order.controller';
 
 const router = express.Router();
 const { ADMIN, CUSTOMER } = ENUM_USER_ROLE;
-router.post('/create-order', auth(ADMIN), OrderController.insertIntoDB);
-router.get('/', auth(ADMIN), OrderController.getAllFromDB);
+router.post(
+  '/create-order',
+  auth(ADMIN, CUSTOMER),
+  OrderController.insertIntoDB
+);
+router.get('/', auth(ADMIN, CUSTOMER), OrderController.getAllFromDB);
 router.get('/:id', auth(ADMIN, CUSTOMER), OrderController.getDataById);
 router.delete('/:id', auth(ADMIN), OrderController.deleteById);
 router.patch('/:id', auth(ADMIN), OrderController.updateIntoDB);
