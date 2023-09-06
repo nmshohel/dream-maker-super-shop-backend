@@ -44,8 +44,8 @@ const insertIntoDB = async (data: any, requestUser: any): Promise<any> => {
     }
   });
 
-  const { id, userId, status, createdAt } = result;
-  return { id, userId, orderedBooks: data.orderedBooks, status, createdAt };
+  const { id, userId, status } = result;
+  return { id, userId, orderedBooks: data.orderedBooks, status };
 };
 
 const getAllFromDB = async (

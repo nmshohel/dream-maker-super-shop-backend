@@ -44,14 +44,21 @@ const getAllFromDB = async (
     where: whereConditons,
     skip,
     take: limit,
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      contactNo: true,
+      address: true,
+      profileImg: true,
+    },
     orderBy:
       options.sortBy && options.sortOrder
         ? {
             [options.sortBy]: options.sortOrder,
           }
-        : {
-            createdAt: 'desc',
-          },
+        : undefined,
   });
 
   const total = await prisma.user.count();
@@ -70,6 +77,15 @@ const getDataById = async (id: string): Promise<User | null> => {
   const result = await prisma.user.findUnique({
     where: {
       id,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      contactNo: true,
+      address: true,
+      profileImg: true,
     },
   });
   return result;

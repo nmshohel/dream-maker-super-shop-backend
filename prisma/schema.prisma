@@ -16,8 +16,6 @@ model User {
   contactNo       String
   address         String
   profileImg      String
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
   reviewAndRating ReviewAndRating[]
   Order           Order[]
 
@@ -43,8 +41,6 @@ model Book {
   publicationDate DateTime
   categoryId      String
   category        Category          @relation(fields: [categoryId], references: [id])
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
   ReviewAndRating ReviewAndRating[]
   orderedBook     OrderedBook[]
 
@@ -52,15 +48,13 @@ model Book {
 }
 
 model ReviewAndRating {
-  id        String   @id @default(uuid())
-  review    String
-  rating    Int
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  bookId    String
-  book      Book     @relation(fields: [bookId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id     String @id @default(uuid())
+  review String
+  rating Int
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+  bookId String
+  book   Book   @relation(fields: [bookId], references: [id])
 
   @@map("review_rating")
 }
@@ -70,22 +64,19 @@ model Order {
   userId      String
   user        User          @relation(fields: [userId], references: [id])
   status      Status?       @default(pending)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
   orderedBook OrderedBook[]
+  createdAt   DateTime      @default(now())
 
   @@map("orders")
 }
 
 model OrderedBook {
-  id        String   @id @default(uuid())
-  orderId   String
-  order     Order    @relation(fields: [orderId], references: [id])
-  bookId    String
-  book      Book     @relation(fields: [bookId], references: [id])
-  quantity  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id       String @id @default(uuid())
+  orderId  String
+  order    Order  @relation(fields: [orderId], references: [id])
+  bookId   String
+  book     Book   @relation(fields: [bookId], references: [id])
+  quantity String
 
   @@map("ordered_books")
 }

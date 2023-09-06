@@ -10,6 +10,9 @@ import { BookFilterRequest } from './book.interface';
 const inertIntoDB = async (data: Book): Promise<Book> => {
   const result = prisma.book.create({
     data: data,
+    include: {
+      category: true,
+    },
   });
   return result;
 };
@@ -72,9 +75,7 @@ const getAllFromDB = async (
         ? {
             [options.sortBy]: options.sortOrder,
           }
-        : {
-            createdAt: 'desc',
-          },
+        : undefined, // Removing the orderBy property when not needed
   });
 
   const total = await prisma.book.count();
@@ -85,6 +86,7 @@ const getAllFromDB = async (
       page,
       limit,
     },
+
     data: result,
   };
 };

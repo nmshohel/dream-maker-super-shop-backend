@@ -5,7 +5,7 @@ import { AuthValidation } from './auth.validation';
 
 const router = express.Router();
 
-router.post('/login', AuthController.loginUser);
+router.post('/signin', AuthController.loginUser);
 router.post('/signup', AuthController.insertIntoDB);
 router.post(
   '/refresh-token',
