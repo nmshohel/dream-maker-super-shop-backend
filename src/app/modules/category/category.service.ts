@@ -55,9 +55,7 @@ const getAllFromDB = async (
         ? {
             [options.sortBy]: options.sortOrder,
           }
-        : {
-            createdAt: 'desc',
-          },
+        : undefined,
   });
 
   const total = await prisma.category.count();

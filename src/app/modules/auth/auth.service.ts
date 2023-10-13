@@ -13,40 +13,24 @@ import {
   IUserLoginResponse,
 } from './auth.interface';
 
-const insertIntoDB = async (data: User): Promise<any> => {
-  try {
-    data.password = await bcrypt.hash(
-      data.password,
-      Number(config.bycrypt_salt_rounds)
-    );
-
-    const result = await prisma.user.create({
-      data: data,
-    });
-
-    return {
-      success: true,
-      statusCode: 200,
-      message: 'User created successfully!',
-      data: {
-        id: result.id,
-        name: result.name,
-        email: result.email,
-        role: result.role,
-        contactNo: result.contactNo,
-        address: result.address,
-        profileImg: result.profileImg,
-      },
-    };
-  } catch (error) {
-    // Handle any errors here
-    return {
-      success: false,
-      statusCode: 500, // or any appropriate error code
-      message: 'Error creating user',
-      data: null,
-    };
+const insertIntoDB = async (data: User): Promise<User> => {
+  data.password = await bcrypt.hash(
+    data.password,
+    Number(config.bycrypt_salt_rounds)
+  );
+  const isExistUser=await prisma.user.findUnique({
+    where:{
+      email:data.email
+    }
+  })
+  if(isExistUser)
+  {
+    throw new ApiError(httpStatus.BAD_REQUEST, "User already exist")
   }
+  const result = prisma.user.create({
+    data: data,
+  });
+  return result;
 };
 
 const loginUser = async (payload: ILoginUser): Promise<IUserLoginResponse> => {
@@ -86,11 +70,12 @@ const loginUser = async (payload: ILoginUser): Promise<IUserLoginResponse> => {
   //     expiresIn: config.jwt.expires_in,
   //   }
   // );
-  console.log(isUserExist);
-  const { email, role } = isUserExist;
+  const { email, role } =
+    isUserExist;
   const userInfo = {
     email,
     role,
+
   };
   const accessToken = jwtHelpers.createToken(
     userInfo,

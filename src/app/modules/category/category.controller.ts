@@ -12,7 +12,7 @@ const insertIntoDB: RequestHandler = catchAsync(async (req, res) => {
   sendResponse<Category>(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'User Created Successfully',
+    message: 'Category Created Successfully',
     data: result,
   });
 });
@@ -25,7 +25,7 @@ const getAllFromDB = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Users fetched successfully',
+    message: 'Category fetched successfully',
     meta: result.meta,
     data: result.data,
   });

@@ -39,7 +39,7 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
   sendResponse<IUserLoginResponse>(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'User signin successfully!',
+    message: 'User login Successfully',
     data: others,
   });
 });

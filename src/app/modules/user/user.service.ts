@@ -91,6 +91,7 @@ const getDataById = async (id: string): Promise<User | null> => {
   return result;
 };
 const deleteById = async (id: string): Promise<User | null> => {
+
   const result = await prisma.user.delete({
     where: {
       id,

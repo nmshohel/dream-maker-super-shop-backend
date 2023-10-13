@@ -23,11 +23,9 @@ model User {
 }
 
 model Category {
-  id        String   @id @default(uuid())
-  title     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  book      Book[]
+  id    String @id @default(uuid())
+  title String
+  book  Book[]
 
   @@map("categories")
 }
@@ -36,9 +34,12 @@ model Book {
   id              String            @id @default(uuid())
   title           String
   author          String
-  price           Float
+  price           String
+  discount String
   genre           String
   publicationDate DateTime
+  publicationBy String
+  description String
   categoryId      String
   category        Category          @relation(fields: [categoryId], references: [id])
   ReviewAndRating ReviewAndRating[]
