@@ -8,44 +8,44 @@ import { IPaginationOptions } from '../../../interfaces/pagination';
 import prisma from '../../../shared/prisma';
 import { OrderSearchableFields } from './order.constrant';
 import { OrderFilterRequest } from './order.interface';
-const insertIntoDB = async (data: any, requestUser: any): Promise<any> => {
-  const getUser = await prisma.user.findUnique({
+const insertIntoDB = async (
+  data: {
+    bookId: string;
+    quantity: number;
+  }[],
+  requestUser: { email: string; role: string }
+): Promise<Order | undefined> => {
+  const reqUser = await prisma.user.findFirst({
     where: {
-      email: requestUser.email,
+      email: requestUser?.email,
     },
   });
-
-  if (!getUser) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'User Not found');
+  if (!reqUser) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'User Not Found');
   }
 
-  const orderedUser = {
-    userId: getUser.id,
-  };
-
-  let result;
-
+  let userOrder: Order | undefined;
+  let userOrderedBook;
   await prisma.$transaction(async transactionClient => {
-    result = await transactionClient.order.create({
-      data: orderedUser,
+    userOrder = await transactionClient.order.create({
+      data: {
+        userEmail: reqUser.email,
+      },
     });
-
-    const { orderedBooks } = data;
-    for (let index = 0; index < orderedBooks.length; index++) {
-      console.log(orderedBooks[index].bookId);
+    for (let index = 0; index < data.length; index++) {
+      console.log(data[index].bookId);
       // eslint-disable-next-line no-unused-vars
-      const createOrder = await transactionClient.orderedBook.create({
+      userOrderedBook = await transactionClient.orderedBook.create({
         data: {
-          orderId: result.id,
-          bookId: orderedBooks[index].bookId,
-          quantity: String(orderedBooks[index].quantity),
+          orderId: userOrder.id,
+          bookId: data[index].bookId,
+          quantity: String(data[index].quantity),
         },
       });
     }
   });
 
-  const { id, userId, status } = result;
-  return { id, userId, orderedBooks: data.orderedBooks, status };
+  return userOrder;
 };
 
 const getAllFromDB = async (
@@ -67,7 +67,7 @@ const getAllFromDB = async (
     // Admins can access all data, so no additional condition needed.
   } else {
     andConditions.push({
-      userId: getUser?.id,
+      userEmail: getUser?.email,
     });
   }
 

@@ -62,8 +62,8 @@ model ReviewAndRating {
 
 model Order {
   id          String        @id @default(uuid())
-  userId      String
-  user        User          @relation(fields: [userId], references: [id])
+  userEmail   String
+  user        User          @relation(fields: [userEmail], references: [email])
   status      Status?       @default(pending)
   orderedBook OrderedBook[]
   createdAt   DateTime      @default(now())
