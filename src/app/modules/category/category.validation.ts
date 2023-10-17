@@ -1,7 +1,9 @@
 import { z } from 'zod';
 
 const create = z.object({
-  title: z.string(),
+  body: z.object({
+    title: z.string(),
+  }),
 });
 const update = z.object({
   title: z.string().optional(),

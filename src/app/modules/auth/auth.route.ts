@@ -6,7 +6,11 @@ import { AuthValidation } from './auth.validation';
 const router = express.Router();
 
 router.post('/signin', AuthController.loginUser);
-router.post('/signup', AuthController.insertIntoDB);
+router.post(
+  '/signup',
+  validateRequest(AuthValidation.signUpZodSchema),
+  AuthController.insertIntoDB
+);
 router.post(
   '/refresh-token',
   validateRequest(AuthValidation.refreshTokenZodSchema),

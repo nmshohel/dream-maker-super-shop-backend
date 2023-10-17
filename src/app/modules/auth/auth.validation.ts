@@ -10,6 +10,33 @@ const loginZodSchema = z.object({
     }),
   }),
 });
+
+const signUpZodSchema = z.object({
+  body: z.object({
+    name: z.string({
+      required_error: 'name is required',
+    }),
+    email: z.string({
+      required_error: 'email is required',
+    }),
+    password: z.string({
+      required_error: 'password is required',
+    }),
+    role: z.string({
+      required_error: 'role is required',
+    }),
+    contactNo: z.string({
+      required_error: 'contact No is required',
+    }),
+    address: z.string({
+      required_error: 'address is required',
+    }),
+    shippingAddress: z.string({
+      required_error: 'shipping Address is required',
+    }),
+    profileImg: z.string().optional(),
+  }),
+});
 const refreshTokenZodSchema = z.object({
   cookies: z.object({
     refreshToken: z.string({
@@ -21,4 +48,5 @@ const refreshTokenZodSchema = z.object({
 export const AuthValidation = {
   loginZodSchema,
   refreshTokenZodSchema,
+  signUpZodSchema,
 };

@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Book, Prisma } from '@prisma/client';
+import httpStatus from 'http-status';
+import ApiError from '../../../errors/ApiError';
 import { paginationHelpers } from '../../../helpers/paginationHelper';
 import { IGenericResponse } from '../../../interfaces/common';
 import { IPaginationOptions } from '../../../interfaces/pagination';
@@ -8,7 +10,16 @@ import { BookSearchableFields } from './book.constrant';
 import { BookFilterRequest } from './book.interface';
 
 const inertIntoDB = async (data: Book): Promise<Book> => {
-  const result = prisma.book.create({
+  const isExist = await prisma.book.findFirst({
+    where: {
+      title: data.title,
+      author: data.author,
+    },
+  });
+  if (isExist) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Book allready added');
+  }
+  const result = await prisma.book.create({
     data: data,
     include: {
       category: true,

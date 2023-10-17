@@ -4,16 +4,22 @@ CREATE TYPE "UserRole" AS ENUM ('admin', 'customer');
 -- CreateEnum
 CREATE TYPE "Status" AS ENUM ('pending', 'shipped', 'delivered');
 
+-- CreateEnum
+CREATE TYPE "OrderType" AS ENUM ('cashOnDelivery', 'cash');
+
 -- CreateTable
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "role" "UserRole",
+    "role" "UserRole" NOT NULL,
     "contactNo" TEXT NOT NULL,
     "address" TEXT NOT NULL,
+    "shippingAddress" TEXT NOT NULL,
     "profileImg" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
@@ -22,6 +28,8 @@ CREATE TABLE "users" (
 CREATE TABLE "categories" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "categories_pkey" PRIMARY KEY ("id")
 );
@@ -37,7 +45,10 @@ CREATE TABLE "books" (
     "publicationDate" TIMESTAMP(3) NOT NULL,
     "publicationBy" TEXT NOT NULL,
     "description" TEXT NOT NULL,
+    "quantity" TEXT NOT NULL,
     "categoryId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "books_pkey" PRIMARY KEY ("id")
 );
@@ -49,6 +60,8 @@ CREATE TABLE "review_rating" (
     "rating" INTEGER NOT NULL,
     "userId" TEXT NOT NULL,
     "bookId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "review_rating_pkey" PRIMARY KEY ("id")
 );
@@ -57,8 +70,10 @@ CREATE TABLE "review_rating" (
 CREATE TABLE "orders" (
     "id" TEXT NOT NULL,
     "userEmail" TEXT NOT NULL,
-    "status" "Status" DEFAULT 'pending',
+    "status" "Status" NOT NULL DEFAULT 'pending',
+    "orderType" "OrderType" NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "orders_pkey" PRIMARY KEY ("id")
 );
@@ -69,6 +84,8 @@ CREATE TABLE "ordered_books" (
     "orderId" TEXT NOT NULL,
     "bookId" TEXT NOT NULL,
     "quantity" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "ordered_books_pkey" PRIMARY KEY ("id")
 );

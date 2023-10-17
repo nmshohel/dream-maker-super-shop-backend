@@ -12,12 +12,15 @@ model User {
   name            String
   email           String            @unique
   password        String
-  role            UserRole?
+  role            UserRole
   contactNo       String
   address         String
+  shippingAddress String
   profileImg      String
   reviewAndRating ReviewAndRating[]
   Order           Order[]
+  createdAt   DateTime      @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("users")
 }
@@ -26,7 +29,8 @@ model Category {
   id    String @id @default(uuid())
   title String
   book  Book[]
-
+  createdAt   DateTime      @default(now())
+  updatedAt DateTime @updatedAt
   @@map("categories")
 }
 
@@ -40,10 +44,13 @@ model Book {
   publicationDate DateTime
   publicationBy String
   description String
+  quantity String
   categoryId      String
   category        Category          @relation(fields: [categoryId], references: [id])
   ReviewAndRating ReviewAndRating[]
   orderedBook     OrderedBook[]
+  createdAt   DateTime      @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("books")
 }
@@ -56,7 +63,8 @@ model ReviewAndRating {
   user   User   @relation(fields: [userId], references: [id])
   bookId String
   book   Book   @relation(fields: [bookId], references: [id])
-
+  createdAt   DateTime      @default(now())
+  updatedAt DateTime @updatedAt
   @@map("review_rating")
 }
 
@@ -64,9 +72,11 @@ model Order {
   id          String        @id @default(uuid())
   userEmail   String
   user        User          @relation(fields: [userEmail], references: [email])
-  status      Status?       @default(pending)
-  orderedBook OrderedBook[]
+  status      Status       @default(pending)
+  orderType  OrderType @default(cashOnDelivery)
   createdAt   DateTime      @default(now())
+  updatedAt DateTime @updatedAt
+  orderedBook OrderedBook[]
 
   @@map("orders")
 }
@@ -78,6 +88,8 @@ model OrderedBook {
   bookId   String
   book     Book   @relation(fields: [bookId], references: [id])
   quantity String
+  createdAt   DateTime      @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("ordered_books")
 }
@@ -91,4 +103,9 @@ enum Status {
   pending
   shipped
   delivered
+}
+
+enum OrderType {
+  cashOnDelivery
+  cash
 }
