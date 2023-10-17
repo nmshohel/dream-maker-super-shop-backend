@@ -14,7 +14,7 @@ const insertIntoDB = async (
     quantity: number;
   }[],
   requestUser: { email: string; role: string }
-): Promise<Order | undefined> => {
+): Promise<any> => {
   const reqUser = await prisma.user.findFirst({
     where: {
       email: requestUser?.email,
@@ -23,9 +23,10 @@ const insertIntoDB = async (
   if (!reqUser) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'User Not Found');
   }
-
+  console.log('data', data);
   let userOrder: Order | undefined;
-  let userOrderedBook;
+  let userOrderedBook: { orderId: string; bookId: string; quantity: string }[] =
+    [];
   await prisma.$transaction(async transactionClient => {
     userOrder = await transactionClient.order.create({
       data: {
@@ -35,17 +36,18 @@ const insertIntoDB = async (
     for (let index = 0; index < data.length; index++) {
       console.log(data[index].bookId);
       // eslint-disable-next-line no-unused-vars
-      userOrderedBook = await transactionClient.orderedBook.create({
+      const orderbook = await transactionClient.orderedBook.create({
         data: {
           orderId: userOrder.id,
           bookId: data[index].bookId,
           quantity: String(data[index].quantity),
         },
       });
+      userOrderedBook.push(orderbook);
     }
   });
-
-  return userOrder;
+  console.log(userOrderedBook);
+  return { userOrder, userOrderedBook };
 };
 
 const getAllFromDB = async (
@@ -99,6 +101,7 @@ const getAllFromDB = async (
     where: whereConditions,
     skip,
     take: limit,
+    include: { orderedBook: true },
     orderBy:
       options.sortBy && options.sortOrder
         ? {
@@ -129,6 +132,9 @@ const getDataById = async (
   const result = await prisma.order.findUnique({
     where: {
       id,
+    },
+    include: {
+      orderedBook: true,
     },
   });
   return result;
