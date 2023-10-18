@@ -13,7 +13,7 @@ const inertIntoDB = async (data: Book): Promise<Book> => {
   const isExist = await prisma.book.findFirst({
     where: {
       title: data.title,
-      author: data.author,
+      authorIds: data.authorIds,
     },
   });
   if (isExist) {
@@ -23,6 +23,7 @@ const inertIntoDB = async (data: Book): Promise<Book> => {
     data: data,
     include: {
       category: true,
+      author: true,
     },
   });
   return result;
@@ -81,6 +82,7 @@ const getAllFromDB = async (
     where: whereConditions,
     skip,
     take: limit,
+    include: { category: true, author: true },
     orderBy:
       options.sortBy && options.sortOrder
         ? {
@@ -107,6 +109,7 @@ const getDataById = async (id: string): Promise<Book | null> => {
     where: {
       id,
     },
+    include: { category: true, author: true },
   });
   return result;
 };
@@ -115,6 +118,7 @@ const deleteById = async (id: string): Promise<Book | null> => {
     where: {
       id,
     },
+    include: { category: true, author: true },
   });
   return result;
 };
@@ -126,6 +130,7 @@ const updateIntoDB = async (
     where: {
       id,
     },
+    include: { category: true, author: true },
     data: payload,
   });
   return result;

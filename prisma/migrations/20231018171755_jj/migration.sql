@@ -35,10 +35,21 @@ CREATE TABLE "categories" (
 );
 
 -- CreateTable
+CREATE TABLE "authors" (
+    "id" TEXT NOT NULL,
+    "nameInBengali" TEXT,
+    "nameInEnglish" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "authors_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "books" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
-    "author" TEXT NOT NULL,
+    "authorIds" TEXT NOT NULL,
     "price" TEXT NOT NULL,
     "discount" TEXT NOT NULL,
     "genre" TEXT NOT NULL,
@@ -71,7 +82,7 @@ CREATE TABLE "orders" (
     "id" TEXT NOT NULL,
     "userEmail" TEXT NOT NULL,
     "status" "Status" NOT NULL DEFAULT 'pending',
-    "orderType" "OrderType" NOT NULL,
+    "orderType" "OrderType" NOT NULL DEFAULT 'cashOnDelivery',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -92,6 +103,9 @@ CREATE TABLE "ordered_books" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
+
+-- AddForeignKey
+ALTER TABLE "books" ADD CONSTRAINT "books_authorIds_fkey" FOREIGN KEY ("authorIds") REFERENCES "authors"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "books" ADD CONSTRAINT "books_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "categories"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

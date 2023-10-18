@@ -34,10 +34,21 @@ model Category {
   @@map("categories")
 }
 
+model Author {
+  id    String @id @default(uuid())
+  nameInBengali String?
+  nameInEnglish String
+  books Book[]
+  createdAt   DateTime      @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("authors")
+}
+
 model Book {
   id              String            @id @default(uuid())
   title           String
-  author          String
+  authorIds          String
+  author Author @relation(fields: [authorIds], references: [id])
   price           String
   discount String
   genre           String
@@ -51,7 +62,7 @@ model Book {
   orderedBook     OrderedBook[]
   createdAt   DateTime      @default(now())
   updatedAt DateTime @updatedAt
-
+ 
   @@map("books")
 }
 

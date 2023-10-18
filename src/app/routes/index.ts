@@ -1,5 +1,6 @@
 import express from 'express';
 import { AuthRoutes } from '../modules/auth/auth.route';
+import { AuthorRoutes } from '../modules/author/author.route';
 import { BookRoutes } from '../modules/book/book.route';
 import { CategoryRoutes } from '../modules/category/category.route';
 import { OrderRoutes } from '../modules/order/order.route';
@@ -21,6 +22,10 @@ const moduleRoutes = [
   {
     path: '/categories',
     route: CategoryRoutes,
+  },
+  {
+    path: '/authors',
+    route: AuthorRoutes,
   },
   {
     path: '/books',
