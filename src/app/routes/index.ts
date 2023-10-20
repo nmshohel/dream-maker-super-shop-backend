@@ -3,7 +3,10 @@ import { AuthRoutes } from '../modules/auth/auth.route';
 import { AuthorRoutes } from '../modules/author/author.route';
 import { BookRoutes } from '../modules/book/book.route';
 import { CategoryRoutes } from '../modules/category/category.route';
+import { GenreRoutes } from '../modules/genre/genre.route';
 import { OrderRoutes } from '../modules/order/order.route';
+import { PublicationRoutes } from '../modules/publication/publication.route';
+import { SubCategoryRoutes } from '../modules/subCategory/subCategory.route';
 import { UserRoutes } from '../modules/user/user.route';
 
 const router = express.Router();
@@ -34,6 +37,18 @@ const moduleRoutes = [
   {
     path: '/orders',
     route: OrderRoutes,
+  },
+  {
+    path: '/sub-categories',
+    route: SubCategoryRoutes,
+  },
+  {
+    path: '/genre',
+    route: GenreRoutes,
+  },
+  {
+    path: '/publication',
+    route: PublicationRoutes,
   },
 ];
 

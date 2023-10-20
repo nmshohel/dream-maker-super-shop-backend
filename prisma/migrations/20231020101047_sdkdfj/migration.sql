@@ -35,6 +35,16 @@ CREATE TABLE "categories" (
 );
 
 -- CreateTable
+CREATE TABLE "sub_categories" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "sub_categories_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "authors" (
     "id" TEXT NOT NULL,
     "nameInBengali" TEXT,
@@ -48,7 +58,7 @@ CREATE TABLE "authors" (
 -- CreateTable
 CREATE TABLE "books" (
     "id" TEXT NOT NULL,
-    "title" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
     "authorIds" TEXT NOT NULL,
     "price" TEXT NOT NULL,
     "discount" TEXT NOT NULL,
@@ -57,7 +67,14 @@ CREATE TABLE "books" (
     "publicationBy" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "quantity" TEXT NOT NULL,
-    "categoryId" TEXT NOT NULL,
+    "thumbImage" TEXT NOT NULL,
+    "images" TEXT NOT NULL,
+    "slug" TEXT NOT NULL,
+    "rate" TEXT NOT NULL,
+    "reviewCount" TEXT NOT NULL,
+    "new" BOOLEAN NOT NULL,
+    "subCategory" TEXT NOT NULL,
+    "category" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -65,16 +82,15 @@ CREATE TABLE "books" (
 );
 
 -- CreateTable
-CREATE TABLE "review_rating" (
+CREATE TABLE "review" (
     "id" TEXT NOT NULL,
     "review" TEXT NOT NULL,
-    "rating" INTEGER NOT NULL,
     "userId" TEXT NOT NULL,
     "bookId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "review_rating_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "review_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -108,13 +124,16 @@ CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 ALTER TABLE "books" ADD CONSTRAINT "books_authorIds_fkey" FOREIGN KEY ("authorIds") REFERENCES "authors"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "books" ADD CONSTRAINT "books_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "categories"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "books" ADD CONSTRAINT "books_subCategory_fkey" FOREIGN KEY ("subCategory") REFERENCES "sub_categories"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "review_rating" ADD CONSTRAINT "review_rating_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "books" ADD CONSTRAINT "books_category_fkey" FOREIGN KEY ("category") REFERENCES "categories"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "review_rating" ADD CONSTRAINT "review_rating_bookId_fkey" FOREIGN KEY ("bookId") REFERENCES "books"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "review" ADD CONSTRAINT "review_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "review" ADD CONSTRAINT "review_bookId_fkey" FOREIGN KEY ("bookId") REFERENCES "books"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "orders" ADD CONSTRAINT "orders_userEmail_fkey" FOREIGN KEY ("userEmail") REFERENCES "users"("email") ON DELETE RESTRICT ON UPDATE CASCADE;

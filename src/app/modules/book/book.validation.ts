@@ -2,30 +2,43 @@ import { z } from 'zod';
 
 const create = z.object({
   body: z.object({
-    title: z.string({
-      required_error: 'title is required',
+    name: z.string({
+      required_error: 'name is required',
     }),
-    authorIds: z.string({
-      required_error: 'authorIds is required',
-    }),
+
     price: z.string({
       required_error: 'price is required',
     }),
     discount: z.string().optional(),
-    genre: z.string({
-      required_error: 'genre is required',
-    }),
+
     publicationDate: z.string({
       required_error: 'publication Date is required',
     }),
-    publicationBy: z.string({
-      required_error: 'publication is required',
-    }),
+
+    description: z.string().optional(),
     quantity: z.string({
       required_error: 'quantity is required',
     }),
-    description: z.string().optional(),
-    categoryId: z.string({
+    thumbImage: z.array(z.string()),
+    images: z.array(z.string()),
+    rate: z.string({
+      required_error: 'rate is required',
+    }),
+    new: z.boolean().optional(),
+
+    publication: z.string({
+      required_error: 'publication is required',
+    }),
+    authorIds: z.string({
+      required_error: 'authorIds is required',
+    }),
+    genre: z.string({
+      required_error: 'genre is required',
+    }),
+    subCategory: z.string({
+      required_error: 'subCategory is required',
+    }),
+    category: z.string({
       required_error: 'category is required',
     }),
   }),

@@ -10,20 +10,31 @@ import { BookSearchableFields } from './book.constrant';
 import { BookFilterRequest } from './book.interface';
 
 const inertIntoDB = async (data: Book): Promise<Book> => {
+  // for create slag
+  const cleanedTitle = data.name
+    .replace(/[^\w\s-]/g, '') // Remove special characters
+    .trim() // Trim leading and trailing spaces
+    .toLowerCase(); // Convert to lowercase
+  const slug = cleanedTitle.replace(/\s+/g, '-');
+
   const isExist = await prisma.book.findFirst({
     where: {
-      title: data.title,
+      name: data.name,
       authorIds: data.authorIds,
     },
   });
   if (isExist) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Book allready added');
   }
+  data.slug = slug;
   const result = await prisma.book.create({
     data: data,
     include: {
-      category: true,
+      categorys: true,
       author: true,
+      subCategorys: true,
+      genres: true,
+      publications: true,
     },
   });
   return result;
@@ -82,7 +93,13 @@ const getAllFromDB = async (
     where: whereConditions,
     skip,
     take: limit,
-    include: { category: true, author: true },
+    include: {
+      categorys: true,
+      author: true,
+      subCategorys: true,
+      genres: true,
+      publications: true,
+    },
     orderBy:
       options.sortBy && options.sortOrder
         ? {
@@ -109,7 +126,13 @@ const getDataById = async (id: string): Promise<Book | null> => {
     where: {
       id,
     },
-    include: { category: true, author: true },
+    include: {
+      categorys: true,
+      author: true,
+      subCategorys: true,
+      genres: true,
+      publications: true,
+    },
   });
   return result;
 };
@@ -118,7 +141,13 @@ const deleteById = async (id: string): Promise<Book | null> => {
     where: {
       id,
     },
-    include: { category: true, author: true },
+    include: {
+      categorys: true,
+      author: true,
+      subCategorys: true,
+      genres: true,
+      publications: true,
+    },
   });
   return result;
 };
@@ -130,7 +159,13 @@ const updateIntoDB = async (
     where: {
       id,
     },
-    include: { category: true, author: true },
+    include: {
+      categorys: true,
+      author: true,
+      subCategorys: true,
+      genres: true,
+      publications: true,
+    },
     data: payload,
   });
   return result;
