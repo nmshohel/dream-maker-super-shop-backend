@@ -63,6 +63,7 @@ const insertIntoDB = async (
   if (!reqUser) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'User Not Found');
   }
+
   let userOrder: any | undefined;
   let userOrderedBook: { orderId: string; bookId: string; quantity: string }[] =
     [];
@@ -132,26 +133,11 @@ const insertIntoDB = async (
 
 const getAllFromDB = async (
   filters: OrderFilterRequest,
-  options: IPaginationOptions,
-  requestUser: any
+  options: IPaginationOptions
 ): Promise<IGenericResponse<Order[]>> => {
-  // console.log('request user:', requestUser);
   const { page, limit, skip } = paginationHelpers.calculatePagination(options);
   const { searchTerm, ...filterData } = filters;
   const andConditions = [];
-  const getUser = await prisma.user.findUnique({
-    where: {
-      email: requestUser.email,
-    },
-  });
-  console.log('get user----------------------', getUser);
-  if (requestUser.role === 'admin') {
-    // Admins can access all data, so no additional condition needed.
-  } else {
-    andConditions.push({
-      userEmail: getUser?.email,
-    });
-  }
 
   if (searchTerm) {
     andConditions.push({
@@ -203,6 +189,67 @@ const getAllFromDB = async (
     data: result,
   };
 };
+const getAllFromDBByCustomer = async (
+  filters: OrderFilterRequest,
+  options: IPaginationOptions,
+  requestUser: any
+): Promise<IGenericResponse<Order[]>> => {
+  const { page, limit, skip } = paginationHelpers.calculatePagination(options);
+  const { searchTerm, ...filterData } = filters;
+  const andConditions = [];
+
+  if (searchTerm) {
+    andConditions.push({
+      OR: OrderSearchableFields.map(field => ({
+        [field]: {
+          contains: searchTerm,
+          mode: 'insensitive',
+        },
+      })),
+    });
+  }
+
+  if (Object.keys(filterData).length > 0) {
+    andConditions.push({
+      AND: Object.keys(filterData).map(key => ({
+        [key]: {
+          equals: (filterData as any)[key],
+        },
+      })),
+    });
+  }
+
+  const whereConditions: Prisma.OrderWhereInput =
+    andConditions.length > 0 ? { AND: andConditions } : {};
+  console.log('requestUser', requestUser);
+  const result = await prisma.order.findMany({
+    where: { ...whereConditions, userEmail: requestUser.email },
+    skip,
+    take: limit,
+    include: { orderedBook: true },
+    orderBy:
+      options.sortBy && options.sortOrder
+        ? {
+            [options.sortBy]: options.sortOrder,
+          }
+        : {
+            createdAt: 'desc',
+          },
+  });
+
+  const total = await prisma.order.count({
+    where: { userEmail: requestUser.email },
+  });
+
+  return {
+    meta: {
+      total,
+      page,
+      limit,
+    },
+    data: result,
+  };
+};
 
 const getDataById = async (
   id: string,
@@ -240,6 +287,7 @@ const updateIntoDB = async (
   return result;
 };
 export const OrderService = {
+  getAllFromDBByCustomer,
   insertIntoDB,
   getAllFromDB,
   getDataById,

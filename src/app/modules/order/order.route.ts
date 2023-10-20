@@ -14,6 +14,11 @@ router.post(
   OrderController.insertIntoDB
 );
 router.get('/', auth(ADMIN), OrderController.getAllFromDB);
+router.get(
+  '/my-order',
+  auth(ADMIN, CUSTOMER),
+  OrderController.getAllFromDBByCustomer
+);
 router.get('/:id', auth(ADMIN, CUSTOMER), OrderController.getDataById);
 router.delete('/:id', auth(ADMIN), OrderController.deleteById);
 router.patch('/:id', auth(ADMIN), OrderController.updateIntoDB);

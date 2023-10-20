@@ -45,11 +45,11 @@ const getAllFromDB = async (
   options: IPaginationOptions
 ): Promise<IGenericResponse<Book[]>> => {
   const { page, limit, skip } = paginationHelpers.calculatePagination(options);
-  const { searchTerm, minPrice, maxPrice, ...filterData } = filters; // Add minPrice and maxPrice
-  const andConditions = [];
+  const { searchTerm, ...filterData } = filters;
+  const andConditons = [];
 
   if (searchTerm) {
-    andConditions.push({
+    andConditons.push({
       OR: BookSearchableFields.map(field => ({
         [field]: {
           contains: searchTerm,
@@ -59,25 +59,8 @@ const getAllFromDB = async (
     });
   }
 
-  // Add conditions for minPrice and maxPrice, converting them to Float
-  if (minPrice !== undefined) {
-    andConditions.push({
-      price: {
-        gte: parseFloat(minPrice), // Convert to Float
-      },
-    });
-  }
-
-  if (maxPrice !== undefined) {
-    andConditions.push({
-      price: {
-        lte: parseFloat(maxPrice), // Convert to Float
-      },
-    });
-  }
-
   if (Object.keys(filterData).length > 0) {
-    andConditions.push({
+    andConditons.push({
       AND: Object.keys(filterData).map(key => ({
         [key]: {
           equals: (filterData as any)[key],
@@ -86,26 +69,19 @@ const getAllFromDB = async (
     });
   }
 
-  const whereConditions: Prisma.BookWhereInput =
-    andConditions.length > 0 ? { AND: andConditions } : {};
+  const whereConditons: Prisma.BookWhereInput =
+    andConditons.length > 0 ? { AND: andConditons } : {};
 
   const result = await prisma.book.findMany({
-    where: whereConditions,
+    where: whereConditons,
     skip,
     take: limit,
-    include: {
-      categorys: true,
-      author: true,
-      subCategorys: true,
-      genres: true,
-      publications: true,
-    },
     orderBy:
       options.sortBy && options.sortOrder
         ? {
             [options.sortBy]: options.sortOrder,
           }
-        : undefined, // Removing the orderBy property when not needed
+        : undefined,
   });
 
   const total = await prisma.book.count();
@@ -116,7 +92,6 @@ const getAllFromDB = async (
       page,
       limit,
     },
-
     data: result,
   };
 };

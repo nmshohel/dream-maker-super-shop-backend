@@ -9,7 +9,7 @@ import { OrderService } from './order.service';
 
 const insertIntoDB: RequestHandler = catchAsync(async (req, res) => {
   const data = req.body;
-  const requestUser = req.user;
+  const requestUser: any = req?.user;
   const result = await OrderService.insertIntoDB(data, requestUser);
   sendResponse<Order>(res, {
     statusCode: httpStatus.OK,
@@ -20,11 +20,29 @@ const insertIntoDB: RequestHandler = catchAsync(async (req, res) => {
 });
 
 const getAllFromDB = catchAsync(async (req, res) => {
-  const requestUser = req.user;
   const filters = pick(req.query, OrderFilterableFields);
   const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
 
-  const result = await OrderService.getAllFromDB(filters, options, requestUser);
+  const result = await OrderService.getAllFromDB(filters, options);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Order fetched successfully',
+    meta: result.meta,
+    data: result.data,
+  });
+});
+
+const getAllFromDBByCustomer = catchAsync(async (req, res) => {
+  // const requestUser = req.user;
+  const filters = pick(req.query, OrderFilterableFields);
+  const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
+  const requestUser: any = req.user;
+  const result = await OrderService.getAllFromDBByCustomer(
+    filters,
+    options,
+    requestUser
+  );
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -72,4 +90,5 @@ export const OrderController = {
   getDataById,
   updateIntoDB,
   deleteById,
+  getAllFromDBByCustomer,
 };

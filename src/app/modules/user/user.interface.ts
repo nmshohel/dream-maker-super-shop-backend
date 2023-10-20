@@ -1,3 +1,3 @@
-export type userFilterRequest = {
-  searchTerm?: string;
-};
+// export type userFilterRequest = {
+//   searchTerm?: string;
+// };

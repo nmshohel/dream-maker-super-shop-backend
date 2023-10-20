@@ -13,8 +13,8 @@ router.post(
   auth(ADMIN),
   BookController.insertIntoDB
 );
-router.get('/', auth(ADMIN, CUSTOMER), BookController.getAllFromDB);
-router.get('/:id', auth(ADMIN, CUSTOMER), BookController.getDataById);
+router.get('/', BookController.getAllFromDB);
+router.get('/:id', BookController.getDataById);
 router.delete('/:id', auth(ADMIN), BookController.deleteById);
 router.patch('/:id', auth(ADMIN), BookController.updateIntoDB);
 

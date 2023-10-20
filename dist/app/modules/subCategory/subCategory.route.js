@@ -1,0 +1,20 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SubCategoryRoutes = void 0;
+const express_1 = __importDefault(require("express"));
+const user_1 = require("../../../enums/user");
+const auth_1 = __importDefault(require("../../middlewares/auth"));
+const validateRequest_1 = __importDefault(require("../../middlewares/validateRequest"));
+const subCategory_controller_1 = require("./subCategory.controller");
+const subCategory_validation_1 = require("./subCategory.validation");
+const router = express_1.default.Router();
+const { ADMIN, CUSTOMER } = user_1.ENUM_USER_ROLE;
+router.post('/create-sub-category', (0, validateRequest_1.default)(subCategory_validation_1.SubCategoryValidation.create), (0, auth_1.default)(ADMIN), subCategory_controller_1.SubCategoryController.insertIntoDB);
+router.get('/', (0, auth_1.default)(ADMIN, CUSTOMER), subCategory_controller_1.SubCategoryController.getAllFromDB);
+router.get('/:id', (0, auth_1.default)(ADMIN, CUSTOMER), subCategory_controller_1.SubCategoryController.getDataById);
+router.delete('/:id', (0, auth_1.default)(ADMIN), subCategory_controller_1.SubCategoryController.deleteById);
+router.patch('/:id', (0, auth_1.default)(ADMIN), subCategory_controller_1.SubCategoryController.updateIntoDB);
+exports.SubCategoryRoutes = router;
