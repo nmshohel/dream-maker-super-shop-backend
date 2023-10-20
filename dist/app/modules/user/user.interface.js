@@ -1,4 +1,2 @@
 "use strict";
-// export type userFilterRequest = {
-//   searchTerm?: string;
-// };
+Object.defineProperty(exports, "__esModule", { value: true });

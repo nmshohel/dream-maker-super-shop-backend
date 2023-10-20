@@ -12,6 +12,7 @@ const genre_route_1 = require("../modules/genre/genre.route");
 const order_route_1 = require("../modules/order/order.route");
 const publication_route_1 = require("../modules/publication/publication.route");
 const subCategory_route_1 = require("../modules/subCategory/subCategory.route");
+const user_route_1 = require("../modules/user/user.route");
 const router = express_1.default.Router();
 const moduleRoutes = [
     // ... routes
@@ -19,10 +20,10 @@ const moduleRoutes = [
         path: '/auth',
         route: auth_route_1.AuthRoutes,
     },
-    // {
-    //   path: '/users',
-    //   route: UserRoutes,
-    // },
+    {
+        path: '/users',
+        route: user_route_1.UserRoutes,
+    },
     {
         path: '/categories',
         route: category_route_1.CategoryRoutes,

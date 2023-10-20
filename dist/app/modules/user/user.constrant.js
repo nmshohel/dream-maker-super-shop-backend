@@ -1,4 +1,6 @@
 "use strict";
-// export const userSearchableFields = ['name', 'email', 'contactNo'];
-// export const userFilterableFields = ['searchTerm', 'role'];
-// //
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.userFilterableFields = exports.userSearchableFields = void 0;
+exports.userSearchableFields = ['name', 'email', 'contactNo'];
+exports.userFilterableFields = ['searchTerm', 'role'];
+//
