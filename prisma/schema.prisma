@@ -19,120 +19,120 @@ model User {
   profileImg      String
   reviewAndRating ReviewAndRating[]
   Order           Order[]
-  createdAt   DateTime      @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 
   @@map("users")
 }
-model Genre {
-  id    String @id @default(uuid())
-  title String
-  book  Book[]
-  createdAt   DateTime      @default(now())
-  updatedAt DateTime @updatedAt
-  @@map("genres")
+
+model ProductType {
+  id        String     @id @default(uuid())
+  title     String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  categorys Category[]
+  products  Product[]
+
+  @@map("product_type")
 }
+
 model Category {
-  id    String @id @default(uuid())
-  title String
-  book  Book[]
-  createdAt   DateTime      @default(now())
-  updatedAt DateTime @updatedAt
+  id            String        @id @default(uuid())
+  title         String
+  productTypeId String
+  productType   ProductType   @relation(fields: [productTypeId], references: [id])
+  products      Product[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  subCategorys  SubCategory[]
+
   @@map("categories")
 }
+
 model SubCategory {
-  id    String @id @default(uuid())
-  title String
-  book  Book[]
-  createdAt   DateTime      @default(now())
-  updatedAt DateTime @updatedAt
+  id         String    @id @default(uuid())
+  title      String
+  categoryId String
+  category   Category  @relation(fields: [categoryId], references: [id])
+  products   Product[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
   @@map("sub_categories")
 }
-model Publication {
-  id    String @id @default(uuid())
-  title String
-  book  Book[]
-  createdAt   DateTime      @default(now())
-  updatedAt DateTime @updatedAt
-  @@map("publications")
+
+model Brand {
+  id        String    @id @default(uuid())
+  title     String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+
+  @@map("brand")
 }
 
-model Author {
-  id    String @id @default(uuid())
-  nameInBengali String?
-  nameInEnglish String
-  books Book[]
-  createdAt   DateTime      @default(now())
-  updatedAt DateTime @updatedAt
-  @@map("authors")
-}
-
-model Book {
+model Product {
   id              String            @id @default(uuid())
-  name           String
+  title           String
   price           String
-  discount String?
-  publicationDate DateTime
-  description String?
-  quantity String
-  thumbImage String[]
-  images String[]
-  slug String 
-  rate String
-  reviewCount String?
-  new Boolean @default(true)
-  /////////////////
-  publication String
-  publications Publication @relation(fields: [publication], references: [id])
-  authorIds          String
-  author Author @relation(fields: [authorIds], references: [id])
-  genre           String
-  genres Genre @relation(fields: [genre], references: [id])
-  subCategory String
-  subCategorys        SubCategory          @relation(fields: [subCategory], references: [id])
-  category      String
-  categorys        Category          @relation(fields: [category], references: [id])
+  discount        String?
+  description     String?
+  brandId         String?
+  brand           Brand?            @relation(fields: [brandId], references: [id])
+  warranty        String?
+  productCode     String?
+  quantity        String
+  thumbImage      String[]
+  images          String[]
+  slug            String
+  rate            String
+  reviewCount     String?
+  new             Boolean           @default(true)
+  productTypeId   String
+  productType     ProductType       @relation(fields: [productTypeId], references: [id])
+  subCategoryId   String
+  subCategorys    SubCategory       @relation(fields: [subCategoryId], references: [id])
+  categoryId      String
+  categorys       Category          @relation(fields: [categoryId], references: [id])
   ReviewAndRating ReviewAndRating[]
-  orderedBook     OrderedBook[]
-  createdAt   DateTime      @default(now())
-  updatedAt DateTime @updatedAt
- 
-  @@map("books")
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@map("products")
 }
 
 model ReviewAndRating {
-  id     String @id @default(uuid())
-  review String
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-  bookId String
-  book   Book   @relation(fields: [bookId], references: [id])
-  createdAt   DateTime      @default(now())
+  id        String   @id @default(uuid())
+  review    String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@map("review")
 }
 
 model Order {
-  id          String        @id @default(uuid())
-  userEmail   String
-  user        User          @relation(fields: [userEmail], references: [email])
-  status      Status       @default(pending)
-  orderType  OrderType @default(cashOnDelivery)
-  createdAt   DateTime      @default(now())
-  updatedAt DateTime @updatedAt
-  orderedBook OrderedBook[]
+  id             String           @id @default(uuid())
+  userEmail      String
+  user           User             @relation(fields: [userEmail], references: [email])
+  status         Status           @default(pending)
+  orderType      OrderType        @default(cashOnDelivery)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  OrderedProduct OrderedProduct[]
 
   @@map("orders")
 }
 
-model OrderedBook {
-  id       String @id @default(uuid())
-  orderId  String
-  order    Order  @relation(fields: [orderId], references: [id])
-  bookId   String
-  book     Book   @relation(fields: [bookId], references: [id])
-  quantity String
-  createdAt   DateTime      @default(now())
+model OrderedProduct {
+  id        String   @id @default(uuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+  quantity  String
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("ordered_books")

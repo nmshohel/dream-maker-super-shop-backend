@@ -1,11 +1,10 @@
 import express from 'express';
 import { AuthRoutes } from '../modules/auth/auth.route';
-import { AuthorRoutes } from '../modules/author/author.route';
-import { BookRoutes } from '../modules/book/book.route';
+import { BrandRoutes } from '../modules/brand/brand.route';
 import { CategoryRoutes } from '../modules/category/category.route';
-import { GenreRoutes } from '../modules/genre/genre.route';
 import { OrderRoutes } from '../modules/order/order.route';
-import { PublicationRoutes } from '../modules/publication/publication.route';
+import { ProductRoutes } from '../modules/product/product.route';
+import { ProductTyeRoutes } from '../modules/productType/productType.route';
 import { SubCategoryRoutes } from '../modules/subCategory/subCategory.route';
 import { UserRoutes } from '../modules/user/user.route';
 
@@ -26,13 +25,10 @@ const moduleRoutes = [
     path: '/categories',
     route: CategoryRoutes,
   },
+
   {
-    path: '/authors',
-    route: AuthorRoutes,
-  },
-  {
-    path: '/books',
-    route: BookRoutes,
+    path: '/products',
+    route: ProductRoutes,
   },
   {
     path: '/orders',
@@ -43,12 +39,12 @@ const moduleRoutes = [
     route: SubCategoryRoutes,
   },
   {
-    path: '/genre',
-    route: GenreRoutes,
+    path: '/brand',
+    route: BrandRoutes,
   },
   {
-    path: '/publication',
-    route: PublicationRoutes,
+    path: '/product-type',
+    route: ProductTyeRoutes,
   },
 ];
 
