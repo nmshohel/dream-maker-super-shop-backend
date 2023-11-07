@@ -50,6 +50,9 @@ const getAllFromDB = async (
     where: whereConditons,
     skip,
     take: limit,
+    include:{
+      productType:true,
+    },
     orderBy:
       options.sortBy && options.sortOrder
         ? {
