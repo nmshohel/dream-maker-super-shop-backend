@@ -97,6 +97,7 @@ model Product {
   ReviewAndRating ReviewAndRating[]
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
+  orderedProducts OrderedProduct[]
 
   @@map("products")
 }
@@ -131,11 +132,31 @@ model OrderedProduct {
   id        String   @id @default(uuid())
   orderId   String
   order     Order    @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
   quantity  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("ordered_books")
+}
+
+model Payment {
+  id                 String        @id @default(uuid())
+  amount             Int
+  userEmail          String?
+  status             PaymentStatus @default(PANDING)
+  transactionId      String
+  paymentGatewayData Json?
+  createdAt          DateTime?     @default(now())
+  updatedAt          DateTime?     @updatedAt
+
+  @@map("payments")
+}
+
+enum PaymentStatus {
+  PANDING
+  PAID
 }
 
 enum UserRole {

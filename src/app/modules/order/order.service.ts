@@ -8,50 +8,11 @@ import { IPaginationOptions } from '../../../interfaces/pagination';
 import prisma from '../../../shared/prisma';
 import { OrderSearchableFields } from './order.constrant';
 import { OrderFilterRequest } from './order.interface';
-// const insertIntoDB = async (
-//   data: {
-//     bookId: string;
-//     quantity: number;
-//   }[],
-//   requestUser: { email: string; role: string }
-// ): Promise<any> => {
-//   const reqUser = await prisma.user.findFirst({
-//     where: {
-//       email: requestUser?.email,
-//     },
-//   });
-//   if (!reqUser) {
-//     throw new ApiError(httpStatus.BAD_REQUEST, 'User Not Found');
-//   }
-//   let userOrder: Order | undefined;
-//   let userOrderedBook: { orderId: string; bookId: string; quantity: string }[] =
-//     [];
-//   await prisma.$transaction(async transactionClient => {
-//     userOrder = await transactionClient.order.create({
-//       data: {
-//         userEmail: reqUser.email,
-//       },
-//     });
-//     for (let index = 0; index < data.length; index++) {
-//       console.log(data[index].bookId);
-//       // eslint-disable-next-line no-unused-vars
-//       const orderbook = await transactionClient.orderedBook.create({
-//         data: {
-//           orderId: userOrder.id,
-//           bookId: data[index].bookId,
-//           quantity: String(data[index].quantity),
-//         },
-//       });
-//       userOrderedBook.push(orderbook);
-//     }
-//   });
-//   return { userOrder, userOrderedBook };
-// };
 
 const insertIntoDB = async (
   data: {
-    bookId: string;
-    quantity: number;
+    productId: string;
+    quantity: string;
   }[],
   requestUser: { email: string; role: string }
 ): Promise<any> => {
@@ -65,7 +26,7 @@ const insertIntoDB = async (
   }
 
   let userOrder: any | undefined;
-  let userOrderedBook: { orderId: string; bookId: string; quantity: string }[] =
+  let userOrderedBook: { orderId: string; productId: string; quantity: string }[] =
     [];
   await prisma.$transaction(async transactionClient => {
     userOrder = await transactionClient.order.findFirst({
@@ -81,42 +42,32 @@ const insertIntoDB = async (
       });
     }
     for (let index = 0; index < data.length; index++) {
-      const existingOrderedBook = await transactionClient.orderedBook.findFirst(
+      const existingOrderedBook = await transactionClient.orderedProduct.findFirst(
         {
           where: {
             orderId: userOrder.id,
-            bookId: data[index].bookId,
+            productId: data[index].productId,
           },
         }
       );
       if (existingOrderedBook) {
-        // Update the existing OrderedBook with new quantity or handle as needed
-        // await transactionClient.orderedBook.update({
-        //   where: {
-        //     id: existingOrderedBook.id,
-        //   },
-        //   data: {
-        //     quantity: String(data[index].quantity),
-        //   },
-        // });
-        // userOrderedBook.push(existingOrderedBook);
         throw new ApiError(httpStatus.BAD_REQUEST, 'Order already submited');
       } else {
-        const newOrderedBook = await transactionClient.orderedBook.create({
+        const newOrderedBook = await transactionClient.orderedProduct.create({
           data: {
             orderId: userOrder.id,
-            bookId: data[index].bookId,
+            productId: data[index].productId,
             quantity: String(data[index].quantity),
           },
         });
-        const booksQuantity = await transactionClient.book.findFirst({
+        const booksQuantity = await transactionClient.product.findFirst({
           where: {
-            id: newOrderedBook.bookId,
+            id: newOrderedBook.productId,
           },
         });
-        const books = await transactionClient.book.update({
+        const products = await transactionClient.product.update({
           where: {
-            id: newOrderedBook.bookId,
+            id: newOrderedBook.productId,
           },
           data: {
             quantity: (
@@ -167,7 +118,7 @@ const getAllFromDB = async (
     where: whereConditions,
     skip,
     take: limit,
-    include: { orderedBook: true },
+    include: { OrderedProduct: true },
     orderBy:
       options.sortBy && options.sortOrder
         ? {
@@ -226,7 +177,7 @@ const getAllFromDBByCustomer = async (
     where: { ...whereConditions, userEmail: requestUser.email },
     skip,
     take: limit,
-    include: { orderedBook: true },
+    include: { OrderedProduct: true },
     orderBy:
       options.sortBy && options.sortOrder
         ? {
@@ -261,7 +212,7 @@ const getDataById = async (
       id,
     },
     include: {
-      orderedBook: true,
+      OrderedProduct: true,
     },
   });
   return result;

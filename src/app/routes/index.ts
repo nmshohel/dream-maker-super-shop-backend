@@ -3,6 +3,7 @@ import { AuthRoutes } from '../modules/auth/auth.route';
 import { BrandRoutes } from '../modules/brand/brand.route';
 import { CategoryRoutes } from '../modules/category/category.route';
 import { OrderRoutes } from '../modules/order/order.route';
+import { PaymentRoutes } from '../modules/payment/payment.route';
 import { ProductRoutes } from '../modules/product/product.route';
 import { ProductTyeRoutes } from '../modules/productType/productType.route';
 import { SubCategoryRoutes } from '../modules/subCategory/subCategory.route';
@@ -45,6 +46,10 @@ const moduleRoutes = [
   {
     path: '/product-type',
     route: ProductTyeRoutes,
+  },
+  {
+    path: '/payment',
+    route: PaymentRoutes,
   },
 ];
 

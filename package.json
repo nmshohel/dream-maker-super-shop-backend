@@ -1,5 +1,5 @@
 {
-  "name": "book-catalog-backend",
+  "name": "dream-maker-super-shop-backend",
   "version": "1.0.0",
   "description": "",
   "engines": {
@@ -41,6 +41,7 @@
     "@types/cookie-parser": "^1.4.3",
     "@types/http-errors": "^2.0.2",
     "@types/jsonwebtoken": "^9.0.2",
+    "axios": "^1.6.1",
     "bcrypt": "^5.1.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",

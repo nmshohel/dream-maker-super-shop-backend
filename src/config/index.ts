@@ -1,21 +1,38 @@
-/* eslint-disable no-undef */
 import dotenv from 'dotenv';
 import path from 'path';
+import { z } from 'zod';
 
 dotenv.config({ path: path.join(process.cwd(), '.env') });
 
+const envVarsZodSchema = z.object({
+  NODE_ENV: z.string(),
+  PORT: z
+    .string()
+    .default('3000')
+    .refine((val) => Number(val)),
+  DATABASE_URL: z.string(),
+  JWT_SECRET: z.string(),
+  STORE_ID: z.string(),
+  STORE_PASS: z.string(),
+  SSL_BASE_PAYMENT_URL: z.string(),
+  SSL_BASE_VALIDATION_URL: z.string()
+});
+
+const envVars = envVarsZodSchema.parse(process.env);
+
 export default {
-  env: process.env.NODE_ENV,
-  port: process.env.PORT,
-  database_url: process.env.DATABASE_URL,
-  default_student_pass: process.env.DEFAULT_STUDENT_PASS,
-  default_faculty_pass: process.env.DEFAULT_FACULTY_PASS,
-  default_admin_pass: process.env.DEFAULT_ADMIN_PASS,
-  bycrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS,
-  jwt: {
-    secret: process.env.JWT_SECRET,
-    refresh_secret: process.env.JWT_REFRESH_SECRET,
-    expires_in: process.env.JWT_EXPIRES_IN,
-    refresh_expires_in: process.env.JWT_REFRESH_EXPIRES_IN,
+  env: envVars.NODE_ENV,
+  port: envVars.PORT,
+  db: {
+    url: envVars.DATABASE_URL
   },
+  jwt: {
+    secret: envVars.JWT_SECRET
+  },
+  ssl: {
+    storeId: envVars.STORE_ID,
+    storePass: envVars.STORE_PASS,
+    sslPaymentUrl: envVars.SSL_BASE_PAYMENT_URL,
+    sslValidationUrl: envVars.SSL_BASE_VALIDATION_URL
+  }
 };
