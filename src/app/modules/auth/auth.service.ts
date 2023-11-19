@@ -16,22 +16,58 @@ import {
 const insertIntoDB = async (data: User): Promise<User> => {
   data.password = await bcrypt.hash(
     data.password,
-    Number(config.bycrypt_salt_rounds)
+    Number(config.jwt.salt_round)
   );
-  const isExistUser=await prisma.user.findUnique({
-    where:{
-      email:data.email
-    }
-  })
-  if(isExistUser)
-  {
-    throw new ApiError(httpStatus.BAD_REQUEST, "User already exist")
-  }
-  const result = prisma.user.create({
-    data: data,
+  const isExistUser = await prisma.user.findUnique({
+    where: {
+      email: data.email,
+    },
   });
+  if (isExistUser) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "User already exists");
+  }
+
+  let result: User | null = null;
+
+  await prisma.$transaction(async (tx) => {
+    const createdUser = await tx.user.create({
+      data: data,
+      include:{
+        addresses:true,
+        shippingAddresses:true
+      }
+    });
+
+    // Check if the user was created successfully
+    if (!createdUser) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Failed to create user");
+    }
+
+    // Assuming createdUser has the expected shape, you can assign it to result
+    result = createdUser;
+
+    const userEmail = createdUser.email;
+
+    const addresses = await tx.address.create({
+      data: {
+        userEmail: userEmail,
+      },
+    });
+
+    const shippingAddress = await tx.shippingAddress.create({
+      data: {
+        userEmail: userEmail,
+      },
+    });
+  });
+
+  if (!result) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "User not created");
+  }
+
   return result;
 };
+
 
 const loginUser = async (payload: ILoginUser): Promise<IUserLoginResponse> => {
   const { email: userEmail, password } = payload;
@@ -80,12 +116,12 @@ const loginUser = async (payload: ILoginUser): Promise<IUserLoginResponse> => {
   const accessToken = jwtHelpers.createToken(
     userInfo,
     config.jwt.secret as string,
-    config.jwt.expires_in as string
+    config.jwt.expiren_in as string
   );
   const refreshToken = jwtHelpers.createToken(
     userInfo,
     config.jwt.refresh_secret as string,
-    config.jwt.refresh_expires_in as string
+    config.jwt.refresh_secret_in as string
   );
 
   // const refreshToken = jwt.sign(
@@ -133,7 +169,7 @@ const refreshToken = async (token: string): Promise<IRefreshTokenResponse> => {
       role: isUserExist.role,
     },
     config.jwt.secret as Secret,
-    config.jwt.expires_in as string
+    config.jwt.expiren_in as string
   );
   return {
     accessToken: newAccessToken,

@@ -15,7 +15,11 @@ const envVarsZodSchema = z.object({
   STORE_ID: z.string(),
   STORE_PASS: z.string(),
   SSL_BASE_PAYMENT_URL: z.string(),
-  SSL_BASE_VALIDATION_URL: z.string()
+  SSL_BASE_VALIDATION_URL: z.string(),
+  BCRYPT_SALT_ROUNDS: z.string(),
+  JWT_EXPIRES_IN: z.string(),
+  JWT_REFRESH_SECRET: z.string(),
+  JWT_REFRESH_EXPIRES_IN: z.string(),
 });
 
 const envVars = envVarsZodSchema.parse(process.env);
@@ -27,8 +31,14 @@ export default {
     url: envVars.DATABASE_URL
   },
   jwt: {
-    secret: envVars.JWT_SECRET
+    secret: envVars.JWT_SECRET,
+    salt_round:envVars.BCRYPT_SALT_ROUNDS,
+    expiren_in:envVars.JWT_EXPIRES_IN,
+    refresh_secret:envVars.JWT_REFRESH_SECRET,
+    refresh_secret_in:envVars.JWT_REFRESH_EXPIRES_IN
+
   },
+
   ssl: {
     storeId: envVars.STORE_ID,
     storePass: envVars.STORE_PASS,

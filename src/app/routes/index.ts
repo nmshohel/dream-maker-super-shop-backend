@@ -1,4 +1,5 @@
 import express from 'express';
+import { AddressRoutes } from '../modules/address/address.route';
 import { AuthRoutes } from '../modules/auth/auth.route';
 import { BrandRoutes } from '../modules/brand/brand.route';
 import { CategoryRoutes } from '../modules/category/category.route';
@@ -6,6 +7,7 @@ import { OrderRoutes } from '../modules/order/order.route';
 import { PaymentRoutes } from '../modules/payment/payment.route';
 import { ProductRoutes } from '../modules/product/product.route';
 import { ProductTyeRoutes } from '../modules/productType/productType.route';
+import { ShippingAddressRoutes } from '../modules/shippingAddress/shippingAddress.route';
 import { SubCategoryRoutes } from '../modules/subCategory/subCategory.route';
 import { UserRoutes } from '../modules/user/user.route';
 
@@ -50,6 +52,14 @@ const moduleRoutes = [
   {
     path: '/payment',
     route: PaymentRoutes,
+  },
+  {
+    path: '/address',
+    route: AddressRoutes,
+  },
+  {
+    path: '/shipping-address',
+    route: ShippingAddressRoutes,
   },
 ];
 

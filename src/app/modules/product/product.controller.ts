@@ -32,10 +32,31 @@ const getAllFromDB = catchAsync(async (req, res) => {
     data: result.data,
   });
 });
+const getAllFromDBByProductType = catchAsync(async (req, res) => {
+  const result = await ProductService.getAllFromDBByProductType();
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Product fetched successfully',
+    data: result.data,
+  });
+
+});
 
 const getDataById = catchAsync(async (req, res) => {
   const id = req.params.id;
   const result = await ProductService.getDataById(id);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Product fetched successfully',
+    data: result,
+  });
+});
+const getDataBySlug = catchAsync(async (req, res) => {
+  const slug = req.params.slug;
+  console.log(slug)
+  const result = await ProductService.getDataBySlug(slug);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -70,4 +91,6 @@ export const ProductController = {
   getDataById,
   updateIntoDB,
   deleteById,
+  getAllFromDBByProductType,
+  getDataBySlug
 };

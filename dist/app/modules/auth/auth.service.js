@@ -20,18 +20,45 @@ const config_1 = __importDefault(require("../../../config"));
 const jwtHelpers_1 = require("../../../helpers/jwtHelpers");
 const prisma_1 = __importDefault(require("../../../shared/prisma"));
 const insertIntoDB = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    data.password = yield bcrypt_1.default.hash(data.password, Number(config_1.default.bycrypt_salt_rounds));
+    data.password = yield bcrypt_1.default.hash(data.password, Number(config_1.default.jwt.salt_round));
     const isExistUser = yield prisma_1.default.user.findUnique({
         where: {
-            email: data.email
-        }
+            email: data.email,
+        },
     });
     if (isExistUser) {
-        throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, "User already exist");
+        throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, "User already exists");
     }
-    const result = prisma_1.default.user.create({
-        data: data,
-    });
+    let result = null;
+    yield prisma_1.default.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
+        const createdUser = yield tx.user.create({
+            data: data,
+            include: {
+                addresses: true,
+                shippingAddresses: true
+            }
+        });
+        // Check if the user was created successfully
+        if (!createdUser) {
+            throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, "Failed to create user");
+        }
+        // Assuming createdUser has the expected shape, you can assign it to result
+        result = createdUser;
+        const userEmail = createdUser.email;
+        const addresses = yield tx.address.create({
+            data: {
+                userEmail: userEmail,
+            },
+        });
+        const shippingAddress = yield tx.shippingAddress.create({
+            data: {
+                userEmail: userEmail,
+            },
+        });
+    }));
+    if (!result) {
+        throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, "User not created");
+    }
     return result;
 });
 const loginUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
@@ -66,8 +93,8 @@ const loginUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
         email,
         role,
     };
-    const accessToken = jwtHelpers_1.jwtHelpers.createToken(userInfo, config_1.default.jwt.secret, config_1.default.jwt.expires_in);
-    const refreshToken = jwtHelpers_1.jwtHelpers.createToken(userInfo, config_1.default.jwt.refresh_secret, config_1.default.jwt.refresh_expires_in);
+    const accessToken = jwtHelpers_1.jwtHelpers.createToken(userInfo, config_1.default.jwt.secret, config_1.default.jwt.expiren_in);
+    const refreshToken = jwtHelpers_1.jwtHelpers.createToken(userInfo, config_1.default.jwt.refresh_secret, config_1.default.jwt.refresh_secret_in);
     // const refreshToken = jwt.sign(
     //   {
     //     id: isUserExist?.id,
@@ -105,7 +132,7 @@ const refreshToken = (token) => __awaiter(void 0, void 0, void 0, function* () {
     const newAccessToken = jwtHelpers_1.jwtHelpers.createToken({
         email: isUserExist.email,
         role: isUserExist.role,
-    }, config_1.default.jwt.secret, config_1.default.jwt.expires_in);
+    }, config_1.default.jwt.secret, config_1.default.jwt.expiren_in);
     return {
         accessToken: newAccessToken,
     };

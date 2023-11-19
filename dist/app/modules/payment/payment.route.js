@@ -1,0 +1,18 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.PaymentRoutes = void 0;
+const express_1 = __importDefault(require("express"));
+const payment_controller_1 = require("./payment.controller");
+const router = express_1.default.Router();
+router.post('/create-payment', payment_controller_1.PaymentController.initPyament);
+router.post('/webhook', payment_controller_1.PaymentController.webhook);
+router.get('/', 
+// auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
+payment_controller_1.PaymentController.getAllFromDB);
+router.get('/:id', 
+// auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
+payment_controller_1.PaymentController.getByIdFromDB);
+exports.PaymentRoutes = router;

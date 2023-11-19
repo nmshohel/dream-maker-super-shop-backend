@@ -26,7 +26,7 @@ const insertIntoDB = async (
   }
 
   let userOrder: any | undefined;
-  let userOrderedBook: { orderId: string; productId: string; quantity: string }[] =
+  let userOrderedProduct: { orderId: string; productId: string; quantity: string }[] =
     [];
   await prisma.$transaction(async transactionClient => {
     userOrder = await transactionClient.order.findFirst({
@@ -75,11 +75,11 @@ const insertIntoDB = async (
             ).toString(),
           },
         });
-        userOrderedBook.push(newOrderedBook);
+        userOrderedProduct.push(newOrderedBook);
       }
     }
   });
-  return { userOrder, userOrderedBook };
+  return { userOrder, userOrderedBook: userOrderedProduct };
 };
 
 const getAllFromDB = async (

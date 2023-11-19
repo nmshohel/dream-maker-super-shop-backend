@@ -62,6 +62,9 @@ const getAllFromDB = (filters, options) => __awaiter(void 0, void 0, void 0, fun
         where: whereConditons,
         skip,
         take: limit,
+        include: {
+            category: true
+        },
         orderBy: options.sortBy && options.sortOrder
             ? {
                 [options.sortBy]: options.sortOrder,

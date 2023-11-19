@@ -29,45 +29,6 @@ const ApiError_1 = __importDefault(require("../../../errors/ApiError"));
 const paginationHelper_1 = require("../../../helpers/paginationHelper");
 const prisma_1 = __importDefault(require("../../../shared/prisma"));
 const order_constrant_1 = require("./order.constrant");
-// const insertIntoDB = async (
-//   data: {
-//     bookId: string;
-//     quantity: number;
-//   }[],
-//   requestUser: { email: string; role: string }
-// ): Promise<any> => {
-//   const reqUser = await prisma.user.findFirst({
-//     where: {
-//       email: requestUser?.email,
-//     },
-//   });
-//   if (!reqUser) {
-//     throw new ApiError(httpStatus.BAD_REQUEST, 'User Not Found');
-//   }
-//   let userOrder: Order | undefined;
-//   let userOrderedBook: { orderId: string; bookId: string; quantity: string }[] =
-//     [];
-//   await prisma.$transaction(async transactionClient => {
-//     userOrder = await transactionClient.order.create({
-//       data: {
-//         userEmail: reqUser.email,
-//       },
-//     });
-//     for (let index = 0; index < data.length; index++) {
-//       console.log(data[index].bookId);
-//       // eslint-disable-next-line no-unused-vars
-//       const orderbook = await transactionClient.orderedBook.create({
-//         data: {
-//           orderId: userOrder.id,
-//           bookId: data[index].bookId,
-//           quantity: String(data[index].quantity),
-//         },
-//       });
-//       userOrderedBook.push(orderbook);
-//     }
-//   });
-//   return { userOrder, userOrderedBook };
-// };
 const insertIntoDB = (data, requestUser) => __awaiter(void 0, void 0, void 0, function* () {
     const reqUser = yield prisma_1.default.user.findFirst({
         where: {
@@ -78,7 +39,7 @@ const insertIntoDB = (data, requestUser) => __awaiter(void 0, void 0, void 0, fu
         throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, 'User Not Found');
     }
     let userOrder;
-    let userOrderedBook = [];
+    let userOrderedProduct = [];
     yield prisma_1.default.$transaction((transactionClient) => __awaiter(void 0, void 0, void 0, function* () {
         userOrder = yield transactionClient.order.findFirst({
             where: {
@@ -93,51 +54,41 @@ const insertIntoDB = (data, requestUser) => __awaiter(void 0, void 0, void 0, fu
             });
         }
         for (let index = 0; index < data.length; index++) {
-            const existingOrderedBook = yield transactionClient.orderedBook.findFirst({
+            const existingOrderedBook = yield transactionClient.orderedProduct.findFirst({
                 where: {
                     orderId: userOrder.id,
-                    bookId: data[index].bookId,
+                    productId: data[index].productId,
                 },
             });
             if (existingOrderedBook) {
-                // Update the existing OrderedBook with new quantity or handle as needed
-                // await transactionClient.orderedBook.update({
-                //   where: {
-                //     id: existingOrderedBook.id,
-                //   },
-                //   data: {
-                //     quantity: String(data[index].quantity),
-                //   },
-                // });
-                // userOrderedBook.push(existingOrderedBook);
                 throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, 'Order already submited');
             }
             else {
-                const newOrderedBook = yield transactionClient.orderedBook.create({
+                const newOrderedBook = yield transactionClient.orderedProduct.create({
                     data: {
                         orderId: userOrder.id,
-                        bookId: data[index].bookId,
+                        productId: data[index].productId,
                         quantity: String(data[index].quantity),
                     },
                 });
-                const booksQuantity = yield transactionClient.book.findFirst({
+                const booksQuantity = yield transactionClient.product.findFirst({
                     where: {
-                        id: newOrderedBook.bookId,
+                        id: newOrderedBook.productId,
                     },
                 });
-                const books = yield transactionClient.book.update({
+                const products = yield transactionClient.product.update({
                     where: {
-                        id: newOrderedBook.bookId,
+                        id: newOrderedBook.productId,
                     },
                     data: {
                         quantity: (Number(booksQuantity === null || booksQuantity === void 0 ? void 0 : booksQuantity.quantity) - Number(newOrderedBook.quantity)).toString(),
                     },
                 });
-                userOrderedBook.push(newOrderedBook);
+                userOrderedProduct.push(newOrderedBook);
             }
         }
     }));
-    return { userOrder, userOrderedBook };
+    return { userOrder, userOrderedBook: userOrderedProduct };
 });
 const getAllFromDB = (filters, options) => __awaiter(void 0, void 0, void 0, function* () {
     const { page, limit, skip } = paginationHelper_1.paginationHelpers.calculatePagination(options);
@@ -167,7 +118,7 @@ const getAllFromDB = (filters, options) => __awaiter(void 0, void 0, void 0, fun
         where: whereConditions,
         skip,
         take: limit,
-        include: { orderedBook: true },
+        include: { OrderedProduct: true },
         orderBy: options.sortBy && options.sortOrder
             ? {
                 [options.sortBy]: options.sortOrder,
@@ -215,7 +166,7 @@ const getAllFromDBByCustomer = (filters, options, requestUser) => __awaiter(void
         where: Object.assign(Object.assign({}, whereConditions), { userEmail: requestUser.email }),
         skip,
         take: limit,
-        include: { orderedBook: true },
+        include: { OrderedProduct: true },
         orderBy: options.sortBy && options.sortOrder
             ? {
                 [options.sortBy]: options.sortOrder,
@@ -243,7 +194,7 @@ const getDataById = (id, requestUser) => __awaiter(void 0, void 0, void 0, funct
             id,
         },
         include: {
-            orderedBook: true,
+            OrderedProduct: true,
         },
     });
     return result;

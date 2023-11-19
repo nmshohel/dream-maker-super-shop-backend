@@ -15,7 +15,9 @@ router.post(
   ProductController.insertIntoDB
 );
 router.get('/', ProductController.getAllFromDB);
+router.get('/product-type', ProductController.getAllFromDBByProductType);
 router.get('/:id', ProductController.getDataById);
+router.get('/slug/:slug', ProductController.getDataBySlug);
 router.delete('/:id', auth(ADMIN), ProductController.deleteById);
 router.patch('/:id', auth(ADMIN), ProductController.updateIntoDB);
 

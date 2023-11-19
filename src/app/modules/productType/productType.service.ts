@@ -98,10 +98,34 @@ const updateIntoDB = async (
   });
   return result;
 };
+
+const getDataByProductType = async () => {
+  const productTypes = await prisma.productType.findMany({
+    include: {
+      categorys: {
+        include: {
+          subCategorys: true,
+        },
+      },
+    },
+  });
+  const itemType = productTypes.map((productType) => ({
+    title: productType.title,
+    categories: productType.categorys.map((category) => ({
+      title: category.title,
+      subcategories: category.subCategorys.map((subCategory) => subCategory.title),
+    })),
+  }));
+  return{
+    itemType
+  }
+
+};
 export const ProductTypeService = {
   inertIntoDB,
   getAllFromDB,
   getDataById,
   updateIntoDB,
   deleteById,
+  getDataByProductType
 };

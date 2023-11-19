@@ -64,10 +64,22 @@ const updateIntoDB = catchAsync(async (req, res) => {
     data: result,
   });
 });
+
+const getDataByProductType = catchAsync(async (req, res) => {
+  const result = await ProductTypeService.getDataByProductType();
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Product type data fetched successfully',
+    data: result
+  });
+
+});
 export const ProductTypeController = {
   insertIntoDB,
   getAllFromDB,
   getDataById,
   updateIntoDB,
   deleteById,
+  getDataByProductType
 };

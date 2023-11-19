@@ -13,7 +13,9 @@ router.post(
   auth(ADMIN),
   ProductTypeController.insertIntoDB
 );
-router.get('/', auth(ADMIN, CUSTOMER), ProductTypeController.getAllFromDB);
+
+router.get('/', ProductTypeController.getAllFromDB);
+router.get('/product-type', ProductTypeController.getDataByProductType);
 router.get('/:id', auth(ADMIN, CUSTOMER), ProductTypeController.getDataById);
 router.delete('/:id', auth(ADMIN), ProductTypeController.deleteById);
 router.patch('/:id', auth(ADMIN), ProductTypeController.updateIntoDB);

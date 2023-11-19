@@ -29,12 +29,6 @@ const signUpZodSchema = zod_1.z.object({
         contactNo: zod_1.z.string({
             required_error: 'contact No is required',
         }),
-        address: zod_1.z.string({
-            required_error: 'address is required',
-        }),
-        shippingAddress: zod_1.z.string({
-            required_error: 'shipping Address is required',
-        }),
         profileImg: zod_1.z.string().optional(),
     }),
 });

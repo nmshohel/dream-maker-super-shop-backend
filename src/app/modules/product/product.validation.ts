@@ -2,15 +2,13 @@ import { z } from 'zod';
 
 const create = z.object({
   body: z.object({
-    title: z.string({
-      required_error: 'title is required',
+    name: z.string({
+      required_error: 'name is required',
     }),
-
     price: z.string({
       required_error: 'price is required',
     }),
     discount: z.string().optional(),
-   
     description: z.string().optional(),
     brandId: z.string().optional(),
     warranty: z.string({
@@ -26,7 +24,6 @@ const create = z.object({
       required_error: 'rate is required',
     }),
     new: z.boolean().optional(),
-
     productTypeId: z.string({
       required_error: 'productTypeId is required',
     }),
