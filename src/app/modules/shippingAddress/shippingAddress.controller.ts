@@ -9,7 +9,7 @@ import { ShippingAddressService } from './shippingAddress.service';
 
 
 const updateAddress = catchAsync(async (req: Request, res: Response) => {
-const email=req?.params?.email
+  const email=req?.user?.email
 const payload=req.body;
 const result=await ShippingAddressService.updateIntoDB(email,payload)
   sendResponse(res, {
@@ -21,7 +21,8 @@ const result=await ShippingAddressService.updateIntoDB(email,payload)
 });
 
 const getByEmail = catchAsync(async (req: Request, res: Response) => {
-const email=req?.params?.email
+const email=req?.user?.email
+console.log(email)
 const result=await ShippingAddressService.getDataByEmail(email)
   sendResponse(res, {
     statusCode: httpStatus.OK,

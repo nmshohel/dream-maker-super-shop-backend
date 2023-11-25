@@ -26,44 +26,58 @@ model User {
 }
 
 model Address {
-  id                  String      @id @default(uuid())
-  userEmail           String      @unique
-  users               User        @relation(fields: [userEmail], references: [email])
-  village             String?
-  postOfficeId        String?
-  postOffices         PostOffice? @relation(fields: [postOfficeId], references: [id])
+  id                  String    @id @default(uuid())
+  userEmail           String    @unique
+  users               User      @relation(fields: [userEmail], references: [email])
+  divisionId          String?
+  divisions           Division? @relation(fields: [divisionId], references: [id])
   thanaId             String?
-  thanas              Thana?      @relation(fields: [thanaId], references: [id])
+  thanas              Thana?    @relation(fields: [thanaId], references: [id])
   districtId          String?
-  districts           District?   @relation(fields: [districtId], references: [id])
+  districts           District? @relation(fields: [districtId], references: [id])
   houseBuildingStreet String?
-  createdAt           DateTime    @default(now())
-  updatedAt           DateTime    @updatedAt
+  postCode            String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   @@map("addresses")
 }
 
 model ShippingAddress {
-  id                  String      @id @default(uuid())
-  userEmail           String      @unique
-  users               User        @relation(fields: [userEmail], references: [email])
-  village             String? //division
-  postOfficeId        String?
-  postOffices         PostOffice? @relation(fields: [postOfficeId], references: [id])
+  id                  String    @id @default(uuid())
+  userEmail           String    @unique
+  users               User      @relation(fields: [userEmail], references: [email])
+  divisionId          String? //division
+  divisions           Division? @relation(fields: [divisionId], references: [id])
   thanaId             String?
-  thanas              Thana?      @relation(fields: [thanaId], references: [id])
+  thanas              Thana?    @relation(fields: [thanaId], references: [id])
   districtId          String?
-  districts           District?   @relation(fields: [districtId], references: [id])
+  districts           District? @relation(fields: [districtId], references: [id])
   houseBuildingStreet String?
-  createdAt           DateTime    @default(now())
-  updatedAt           DateTime    @updatedAt
+  postCode            String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   @@map("shipping_addresses")
+}
+
+model Division {
+  id              String            @id @default(uuid())
+  title           String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  districts       District[]
+  shippingAddress ShippingAddress[]
+  address         Address[]
+
+  @@map("division")
 }
 
 model District {
   id                String            @id @default(uuid())
   title             String
+  divisionId        String
+  division          Division          @relation(fields: [divisionId], references: [id])
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
   thanas            Thana[]
@@ -80,25 +94,10 @@ model Thana {
   district          District          @relation(fields: [districtId], references: [id])
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
-  postOffices       PostOffice[]
   addresses         Address[]
   shippingAddresses ShippingAddress[]
 
   @@map("thana")
-}
-
-model PostOffice {
-  id                String            @id @default(uuid())
-  title             String
-  postCode          String
-  thanaId           String
-  thana             Thana             @relation(fields: [thanaId], references: [id])
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
-  addresses         Address[]
-  shippingAddresses ShippingAddress[]
-
-  @@map("post_offices")
 }
 
 model ProductType {
@@ -170,6 +169,8 @@ model Product {
   subCategorys    SubCategory       @relation(fields: [subCategoryId], references: [id])
   categoryId      String
   categorys       Category          @relation(fields: [categoryId], references: [id])
+  supplierId      String?
+  supplier        Supplier?         @relation(fields: [supplierId], references: [id])
   ReviewAndRating ReviewAndRating[]
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
@@ -192,25 +193,31 @@ model ReviewAndRating {
 }
 
 model Order {
-  id             String           @id @default(uuid())
-  userEmail      String
-  user           User             @relation(fields: [userEmail], references: [email])
-  status         Status           @default(pending)
-  orderType      OrderType        @default(cashOnDelivery)
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  //shipping address
-  //totalPrice
-  //totaldiscount
-  //
-  OrderedProduct OrderedProduct[]
+  id                  String           @id @default(uuid())
+  orderId             String?          @unique //custom id
+  userEmail           String
+  user                User             @relation(fields: [userEmail], references: [email])
+  status              Status           @default(pending)
+  orderType           OrderType        @default(cashOnDelivery)
+  totalPrice          String?
+  totaldiscount       String?
+  division            String?
+  district            String?
+  thana               String?
+  postCode            String?
+  houseBuildingStreet String?
+  contactNo           String?
+  name                String?
+  OrderedProduct      OrderedProduct[]
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
 
   @@map("orders")
 }
 
 model OrderedProduct {
   id        String   @id @default(uuid())
-  amount    String?
+  price     String?
   discount  String?
   orderId   String
   order     Order    @relation(fields: [orderId], references: [id])
@@ -221,6 +228,18 @@ model OrderedProduct {
   updatedAt DateTime @updatedAt
 
   @@map("ordered_books")
+}
+
+model Supplier {
+  id        String    @id @default(uuid())
+  name      String
+  address   String
+  contactNo String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+
+  @@map("suppliers")
 }
 
 model Payment {

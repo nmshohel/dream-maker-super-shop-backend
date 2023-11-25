@@ -7,9 +7,9 @@ import { ShippingAddressController } from './shippingAddress.controller';
 
 const router = express.Router();
 
-router.patch('/:email',auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.CUSTOMER),
+router.patch('/',auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.CUSTOMER),
  ShippingAddressController.updateAddress);
-router.get('/:email',auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.CUSTOMER),
+router.get('/',auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.CUSTOMER),
 ShippingAddressController.getByEmail);
 
 

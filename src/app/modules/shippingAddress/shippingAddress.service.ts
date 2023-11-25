@@ -9,20 +9,33 @@ import prisma from '../../../shared/prisma';
 
 const updateIntoDB = async (
   email: string,
-  payload: Partial<ShippingAddress>
-): Promise<ShippingAddress> => {
-    if(!email)
-    {
-        throw new ApiError(httpStatus.BAD_REQUEST, "User Not Found")
+  payload: any
+): Promise<ShippingAddress | null> => {
+  
+
+    // Check if the record exists
+    const existingRecord = await prisma.shippingAddress.findUnique({
+      where: {
+        userEmail: email,
+      },
+    });
+
+    if (!existingRecord) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "User not found")
     }
-  const result = await prisma.shippingAddress.update({
-    where: {
-      userEmail:email,
-    },
-    data: payload,
-  });
-  return result;
+
+    // If the record exists, proceed with the update
+    const result = await prisma.shippingAddress.update({
+      where: {
+        userEmail: email,
+      },
+      data: payload,
+    });
+
+    return result;
+
 };
+
 
 const getDataByEmail = async (email: string): Promise<ShippingAddress | null> => {
     if(!email)
@@ -36,7 +49,6 @@ const getDataByEmail = async (email: string): Promise<ShippingAddress | null> =>
       include:{
         districts:true,
         thanas:true,
-        postOffices:true,
         users:true
       }
     });

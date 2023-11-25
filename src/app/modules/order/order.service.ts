@@ -16,70 +16,124 @@ const insertIntoDB = async (
   }[],
   requestUser: { email: string; role: string }
 ): Promise<any> => {
-  const reqUser = await prisma.user.findFirst({
+  const authUser = await prisma.user.findFirst({
     where: {
       email: requestUser?.email,
     },
   });
-  if (!reqUser) {
+  if (!authUser) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'User Not Found');
   }
-
+  let userShippingAddress=await prisma.shippingAddress.findFirst({
+    where:{
+      userEmail:requestUser?.email,
+    }
+  })
+  if(!userShippingAddress)
+  {
+    throw new ApiError(httpStatus.BAD_REQUEST, "User Shipping Address Not found")
+  }
   let userOrder: any | undefined;
+  let totalPrice:number=0
+  let totalDiscount:number=0
   let userOrderedProduct: { orderId: string; productId: string; quantity: string }[] =
     [];
   await prisma.$transaction(async transactionClient => {
-    userOrder = await transactionClient.order.findFirst({
-      where: {
-        userEmail: reqUser.email,
-      },
-    });
-    if (!userOrder) {
+
       userOrder = await transactionClient.order.create({
         data: {
-          userEmail: reqUser.email,
+          userEmail: authUser?.email,
+          orderType:"cashOnDelivery",
+          thana:userShippingAddress?.thanaId,
+          district:userShippingAddress?.districtId,
+          division:userShippingAddress?.divisionId,
+          postCode:userShippingAddress?.postCode,
+          houseBuildingStreet:userShippingAddress?.houseBuildingStreet,
+          contactNo:authUser?.contactNo,
+          name:authUser.name
         },
       });
-    }
+
+      
+//start loop
     for (let index = 0; index < data.length; index++) {
-      const existingOrderedBook = await transactionClient.orderedProduct.findFirst(
+        const product=await transactionClient.product.findFirst({
+          where:{
+            id:data[index].productId
+          }
+        })
+        if(!product)
         {
-          where: {
-            orderId: userOrder.id,
-            productId: data[index].productId,
-          },
+          throw new ApiError(httpStatus.BAD_REQUEST, "Product Not Found")
         }
-      );
-      if (existingOrderedBook) {
-        throw new ApiError(httpStatus.BAD_REQUEST, 'Order already submited');
-      } else {
-        const newOrderedBook = await transactionClient.orderedProduct.create({
+
+        if (
+          product.discount !== undefined &&
+          product.price !== undefined &&
+          product.quantity !== undefined
+        ) {
+          const parsedDiscount = parseInt(product.discount!);
+          const parsedPrice = parseInt(product.price);
+          const parsedQuantity = parseInt(product.quantity);
+        
+          if (!isNaN(parsedDiscount) && !isNaN(parsedPrice) && !isNaN(parsedQuantity)) {
+            totalDiscount += parsedDiscount * parsedQuantity;
+            totalPrice += parsedPrice * parsedQuantity;
+        
+            console.log("totalDiscount", totalDiscount);
+            console.log("totalPrice", totalPrice);
+          } else {
+            console.log("Invalid numeric values in product data");
+          }
+        }
+
+        const newOrderedProduct = await transactionClient.orderedProduct.create({
           data: {
             orderId: userOrder.id,
             productId: data[index].productId,
             quantity: String(data[index].quantity),
+            price:product.price,
+            discount:product.discount
           },
         });
-        const booksQuantity = await transactionClient.product.findFirst({
+
+//   for decrease order quantity
+        const productsQuantity = await transactionClient.product.findFirst({
           where: {
-            id: newOrderedBook.productId,
+            id: newOrderedProduct.productId,
           },
         });
+
         const products = await transactionClient.product.update({
           where: {
-            id: newOrderedBook.productId,
+            id: newOrderedProduct.productId,
           },
           data: {
             quantity: (
-              Number(booksQuantity?.quantity) - Number(newOrderedBook.quantity)
+              Number(productsQuantity?.quantity) - Number(newOrderedProduct.quantity)
             ).toString(),
           },
         });
-        userOrderedProduct.push(newOrderedBook);
+
+        userOrderedProduct.push(newOrderedProduct);
+ 
+    }//end loop
+
+    userOrder=await transactionClient.order.update({
+      where:{
+        id:userOrder?.id
+      },
+      data:{
+        totaldiscount:totalDiscount.toString(),
+        totalPrice:totalPrice.toString()
       }
-    }
-  });
-  return { userOrder, userOrderedBook: userOrderedProduct };
+
+    })
+
+
+
+  });//end transction
+  return { userOrder, userOrderedProduct: userOrderedProduct };
 };
 
 const getAllFromDB = async (
