@@ -88,10 +88,12 @@ const loginUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     //     expiresIn: config.jwt.expires_in,
     //   }
     // );
-    const { email, role } = isUserExist;
+    const { email, role, name, profileImg } = isUserExist;
     const userInfo = {
         email,
         role,
+        name,
+        profileImg
     };
     const accessToken = jwtHelpers_1.jwtHelpers.createToken(userInfo, config_1.default.jwt.secret, config_1.default.jwt.expiren_in);
     const refreshToken = jwtHelpers_1.jwtHelpers.createToken(userInfo, config_1.default.jwt.refresh_secret, config_1.default.jwt.refresh_secret_in);
@@ -132,6 +134,8 @@ const refreshToken = (token) => __awaiter(void 0, void 0, void 0, function* () {
     const newAccessToken = jwtHelpers_1.jwtHelpers.createToken({
         email: isUserExist.email,
         role: isUserExist.role,
+        name: isUserExist.name,
+        profileImg: isUserExist.profileImg
     }, config_1.default.jwt.secret, config_1.default.jwt.expiren_in);
     return {
         accessToken: newAccessToken,

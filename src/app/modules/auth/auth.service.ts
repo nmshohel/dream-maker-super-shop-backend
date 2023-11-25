@@ -106,11 +106,13 @@ const loginUser = async (payload: ILoginUser): Promise<IUserLoginResponse> => {
   //     expiresIn: config.jwt.expires_in,
   //   }
   // );
-  const { email, role } =
+  const { email, role,name,profileImg } =
     isUserExist;
   const userInfo = {
     email,
     role,
+    name,
+    profileImg
 
   };
   const accessToken = jwtHelpers.createToken(
@@ -167,6 +169,9 @@ const refreshToken = async (token: string): Promise<IRefreshTokenResponse> => {
     {
       email: isUserExist.email,
       role: isUserExist.role,
+      name:isUserExist.name,
+      profileImg:isUserExist.profileImg
+      
     },
     config.jwt.secret as Secret,
     config.jwt.expiren_in as string

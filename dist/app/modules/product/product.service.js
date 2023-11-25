@@ -186,6 +186,7 @@ const getAllFromDBByProductType = () => __awaiter(void 0, void 0, void 0, functi
         automotiveMotorbike: [],
         homeAndLifestyle: [],
         watchesBagsJewellery: [],
+        womenGirlsFashion: [],
     };
     products.map((p) => {
         if (p.productTypeId === '343fa2e7-4e6b-435a-bfdf-82ed1f955a16') {
@@ -214,6 +215,9 @@ const getAllFromDBByProductType = () => __awaiter(void 0, void 0, void 0, functi
         }
         else if (p.productTypeId === 'c15b8816-72d0-4a0e-9a22-6eb442a4ec3b') {
             result.watchesBagsJewellery.push(p);
+        }
+        else if (p.productTypeId === 'e4889350-4160-4a86-af2e-47b4e9a7688b') {
+            result.womenGirlsFashion.push(p);
         }
     });
     return {

@@ -189,32 +189,36 @@ const getAllFromDBByProductType = async () => {
     automotiveMotorbike: [] as Product[],
     homeAndLifestyle: [] as Product[],
     watchesBagsJewellery: [] as Product[],
+    womenGirlsFashion: [] as Product[],
   };
   products.map((p) => {
-    if (p.productTypeId === '343fa2e7-4e6b-435a-bfdf-82ed1f955a16') {
+    if (p.productTypeId === '559f9252-6dce-4d27-88df-6b13e32e05e8') {
       result.electronicsDevices.push(p);
-    } else if (p.productTypeId === '51414356-5509-45fd-aa1d-e2407d7f958c') {
+    } else if (p.productTypeId === 'c9fc52c2-19ad-4432-baa9-4bf99d5f689a') {
       result.sportsAndOutdoors.push(p);
-    } else if (p.productTypeId === '61e49527-6a0b-4f51-8931-74c842f0d536') {
+    } else if (p.productTypeId === '4f894cb5-5607-4bf9-80d7-1ace1512b817') {
       result.groceries.push(p);
     }
-    else if (p.productTypeId === '72323d71-7714-4060-aecc-bd1162503392') {
+    else if (p.productTypeId === 'eaedfff0-ba81-4aeb-a4a7-0d56a056cf43') {
       result.healthAndBeauty.push(p);
     }
-    else if (p.productTypeId === '90a11a21-63c8-496d-9cc8-2605194fc6ff') {
+    else if (p.productTypeId === 'ef9c0e57-cd6d-4bb6-a95d-21c0be73a760') {
       result.menAndBoysFashion.push(p);
     }
-    else if (p.productTypeId === '9b1929ab-61d3-4a03-b5d1-573e3a258b13') {
+    else if (p.productTypeId === '41418d95-d1ad-423d-880e-fd961f6363f7') {
       result.electronicAccessories.push(p);
     }
-    else if (p.productTypeId === 'a1488bd9-0e27-49af-9c8e-de9e35a7478a') {
+    else if (p.productTypeId === '37b5c5f8-f710-419c-88f3-6d0e11799364') {
       result.automotiveMotorbike.push(p);
     }
-    else if (p.productTypeId === 'bd09dfe8-c933-47c7-b428-0cb0b7ea407a') {
+    else if (p.productTypeId === '52ee6366-5faf-48f2-8ee5-7767f7754d8f') {
       result.homeAndLifestyle.push(p);
     }
-    else if (p.productTypeId === 'c15b8816-72d0-4a0e-9a22-6eb442a4ec3b') {
+    else if (p.productTypeId === 'a4100745-1ec3-43b0-9b54-4a051382549b') {
       result.watchesBagsJewellery.push(p);
+    }
+    else if (p.productTypeId === '6451e0dd-e839-4186-8a17-c2194b3471ae') {
+      result.womenGirlsFashion.push(p);
     }
   });
   return {

@@ -47,7 +47,7 @@ model ShippingAddress {
   id                  String      @id @default(uuid())
   userEmail           String      @unique
   users               User        @relation(fields: [userEmail], references: [email])
-  village             String?
+  village             String? //division
   postOfficeId        String?
   postOffices         PostOffice? @relation(fields: [postOfficeId], references: [id])
   thanaId             String?
@@ -199,6 +199,10 @@ model Order {
   orderType      OrderType        @default(cashOnDelivery)
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
+  //shipping address
+  //totalPrice
+  //totaldiscount
+  //
   OrderedProduct OrderedProduct[]
 
   @@map("orders")
