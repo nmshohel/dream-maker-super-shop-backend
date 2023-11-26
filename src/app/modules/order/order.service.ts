@@ -8,14 +8,19 @@ import { IPaginationOptions } from '../../../interfaces/pagination';
 import prisma from '../../../shared/prisma';
 import { OrderSearchableFields } from './order.constrant';
 import { OrderFilterRequest } from './order.interface';
+import { generateOrderId } from './order.utils';
 
 const insertIntoDB = async (
-  data: {
-    productId: string;
-    quantity: string;
-  }[],
+  userData: any,
   requestUser: { email: string; role: string }
 ): Promise<any> => {
+
+  const {product,...orderType}=userData
+  const data=product
+  const generatedOrderId=await generateOrderId()
+
+  let userOrderType = orderType.orderType;
+  userOrderType = userOrderType?userOrderType: "cashOnDelivery";
   const authUser = await prisma.user.findFirst({
     where: {
       email: requestUser?.email,
@@ -29,7 +34,13 @@ const insertIntoDB = async (
       userEmail:requestUser?.email,
     }
   })
-  if(!userShippingAddress)
+  if(!userShippingAddress?.districtId ||
+     !userShippingAddress?.postCode ||
+      !userShippingAddress?.divisionId ||
+       !userShippingAddress?.thanaId ||
+       !userShippingAddress?.houseBuildingStreet 
+
+    )
   {
     throw new ApiError(httpStatus.BAD_REQUEST, "User Shipping Address Not found")
   }
@@ -39,14 +50,19 @@ const insertIntoDB = async (
   let userOrderedProduct: { orderId: string; productId: string; quantity: string }[] =
     [];
   await prisma.$transaction(async transactionClient => {
-
+    
+          if(userOrderType===undefined)
+          {
+            throw new ApiError(httpStatus.BAD_REQUEST, "undidiend")
+          }
       userOrder = await transactionClient.order.create({
         data: {
           userEmail: authUser?.email,
-          orderType:"cashOnDelivery",
-          thana:userShippingAddress?.thanaId,
-          district:userShippingAddress?.districtId,
-          division:userShippingAddress?.divisionId,
+          orderType:userOrderType,
+          orderId:generatedOrderId,
+          divisionId:userShippingAddress?.divisionId,
+          districtId:userShippingAddress?.districtId,
+          thanaId:userShippingAddress?.thanaId,
           postCode:userShippingAddress?.postCode,
           houseBuildingStreet:userShippingAddress?.houseBuildingStreet,
           contactNo:authUser?.contactNo,
@@ -67,29 +83,20 @@ const insertIntoDB = async (
           throw new ApiError(httpStatus.BAD_REQUEST, "Product Not Found")
         }
 
-        if (
-          product.discount !== undefined &&
-          product.price !== undefined &&
-          product.quantity !== undefined
-        ) {
-          const parsedDiscount = parseInt(product.discount!);
-          const parsedPrice = parseInt(product.price);
-          const parsedQuantity = parseInt(product.quantity);
-        
-          if (!isNaN(parsedDiscount) && !isNaN(parsedPrice) && !isNaN(parsedQuantity)) {
-            totalDiscount += parsedDiscount * parsedQuantity;
-            totalPrice += parsedPrice * parsedQuantity;
-        
-            console.log("totalDiscount", totalDiscount);
-            console.log("totalPrice", totalPrice);
-          } else {
-            console.log("Invalid numeric values in product data");
-          }
+          //sum of total price and total discount
+        if(product.discount)
+        {
+          totalDiscount=totalDiscount+(parseInt(product.discount)*parseInt(data[index].quantity))
         }
+        if(product.price)
+        {
+          totalPrice=totalPrice+(parseInt(product.price)*parseInt(data[index].quantity))
+        }
+
 
         const newOrderedProduct = await transactionClient.orderedProduct.create({
           data: {
-            orderId: userOrder.id,
+            orderId: userOrder.orderId,
             productId: data[index].productId,
             quantity: String(data[index].quantity),
             price:product.price,
@@ -125,7 +132,7 @@ const insertIntoDB = async (
       },
       data:{
         totaldiscount:totalDiscount.toString(),
-        totalPrice:totalPrice.toString()
+        totalPrice:totalPrice.toString(),
       }
 
     })

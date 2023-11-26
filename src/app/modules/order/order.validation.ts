@@ -10,7 +10,10 @@ const create = z.object({
         required_error: 'Quantity is required',
       }),
     })
-  ),
+  ).refine(data => Array.isArray(data), {
+    message: 'Expected array, received object',
+  }),
+  orderType: z.string({ required_error: "Order type is required" }),
 });
 
 export const OrderValidation = {

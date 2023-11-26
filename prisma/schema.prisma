@@ -69,6 +69,7 @@ model Division {
   districts       District[]
   shippingAddress ShippingAddress[]
   address         Address[]
+  Orders          Order[]
 
   @@map("division")
 }
@@ -83,6 +84,7 @@ model District {
   thanas            Thana[]
   addresses         Address[]
   shippingAddresses ShippingAddress[]
+  orders            Order[]
 
   @@map("district")
 }
@@ -96,6 +98,7 @@ model Thana {
   updatedAt         DateTime          @updatedAt
   addresses         Address[]
   shippingAddresses ShippingAddress[]
+  orders            Order[]
 
   @@map("thana")
 }
@@ -194,16 +197,19 @@ model ReviewAndRating {
 
 model Order {
   id                  String           @id @default(uuid())
-  orderId             String?          @unique //custom id
+  orderId             String?          @unique
   userEmail           String
   user                User             @relation(fields: [userEmail], references: [email])
   status              Status           @default(pending)
   orderType           OrderType        @default(cashOnDelivery)
   totalPrice          String?
   totaldiscount       String?
-  division            String?
-  district            String?
-  thana               String?
+  divisionId          String?
+  division            Division?        @relation(fields: [divisionId], references: [id])
+  districtId          String?
+  district            District?        @relation(fields: [districtId], references: [id])
+  thanaId             String?
+  thana               Thana?           @relation(fields: [thanaId], references: [id])
   postCode            String?
   houseBuildingStreet String?
   contactNo           String?
@@ -220,14 +226,14 @@ model OrderedProduct {
   price     String?
   discount  String?
   orderId   String
-  order     Order    @relation(fields: [orderId], references: [id])
+  order     Order    @relation(fields: [orderId], references: [orderId])
   productId String
   product   Product  @relation(fields: [productId], references: [id])
   quantity  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("ordered_books")
+  @@map("ordered_products")
 }
 
 model Supplier {
