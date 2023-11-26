@@ -9,6 +9,7 @@ import { ProductRoutes } from '../modules/product/product.route';
 import { ProductTyeRoutes } from '../modules/productType/productType.route';
 import { ShippingAddressRoutes } from '../modules/shippingAddress/shippingAddress.route';
 import { SubCategoryRoutes } from '../modules/subCategory/subCategory.route';
+import { SupplierRoutes } from '../modules/supplier/supplier.route';
 import { UserRoutes } from '../modules/user/user.route';
 
 const router = express.Router();
@@ -60,6 +61,10 @@ const moduleRoutes = [
   {
     path: '/shipping-address',
     route: ShippingAddressRoutes,
+  },
+  {
+    path: '/suppliers',
+    route: SupplierRoutes,
   },
 ];
 

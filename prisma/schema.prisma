@@ -8,28 +8,28 @@ datasource db {
 }
 
 model User {
-  id                String            @id @default(uuid())
-  name              String
-  email             String            @unique
-  password          String
-  role              UserRole
-  contactNo         String
-  profileImg        String?
-  reviewAndRating   ReviewAndRating[]
-  Order             Order[]
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
-  addresses         Address?
-  shippingAddresses ShippingAddress?
+  id              String            @id @default(uuid())
+  name            String
+  email           String            @unique
+  password        String
+  role            UserRole
+  contactNo       String
+  profileImg      String?
+  reviewAndRating ReviewAndRating[]
+  Order           Order[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  address         Address?
+  shippingAddress ShippingAddress?
 
   @@map("users")
 }
 
 model Address {
   id                  String    @id @default(uuid())
-  userEmail           String    @unique
-  users               User      @relation(fields: [userEmail], references: [email])
-  divisionId          String?
+  userEmail           String?   @unique
+  users               User?     @relation(fields: [userEmail], references: [email])
+  divisionId          String? //division
   divisions           Division? @relation(fields: [divisionId], references: [id])
   thanaId             String?
   thanas              Thana?    @relation(fields: [thanaId], references: [id])
@@ -45,8 +45,8 @@ model Address {
 
 model ShippingAddress {
   id                  String    @id @default(uuid())
-  userEmail           String    @unique
-  users               User      @relation(fields: [userEmail], references: [email])
+  userEmail           String?   @unique
+  users               User?     @relation(fields: [userEmail], references: [email])
   divisionId          String? //division
   divisions           Division? @relation(fields: [divisionId], references: [id])
   thanaId             String?
@@ -172,8 +172,8 @@ model Product {
   subCategorys    SubCategory       @relation(fields: [subCategoryId], references: [id])
   categoryId      String
   categorys       Category          @relation(fields: [categoryId], references: [id])
-  supplierId      String?
-  supplier        Supplier?         @relation(fields: [supplierId], references: [id])
+  supplierId      String
+  supplier        Supplier          @relation(fields: [supplierId], references: [id])
   ReviewAndRating ReviewAndRating[]
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
@@ -202,8 +202,8 @@ model Order {
   user                User             @relation(fields: [userEmail], references: [email])
   status              Status           @default(pending)
   orderType           OrderType        @default(cashOnDelivery)
-  totalPrice          String?
-  totaldiscount       String?
+  totalPrice          String
+  totaldiscount       String
   divisionId          String?
   division            Division?        @relation(fields: [divisionId], references: [id])
   districtId          String?

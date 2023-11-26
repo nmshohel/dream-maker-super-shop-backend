@@ -33,6 +33,9 @@ const create = z.object({
     categoryId: z.string({
       required_error: 'categoryId is required',
     }),
+    supplierId: z.string({
+      required_error: 'supplierId is required',
+    }),
   }),
 });
 export const ProductValidation = {

@@ -1,24 +1,30 @@
-import { Prisma, User } from '@prisma/client';
-import httpStatus from 'http-status';
-import ApiError from '../../../errors/ApiError';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Prisma, Supplier } from '@prisma/client';
 import { paginationHelpers } from '../../../helpers/paginationHelper';
 import { IGenericResponse } from '../../../interfaces/common';
 import { IPaginationOptions } from '../../../interfaces/pagination';
 import prisma from '../../../shared/prisma';
-import { userSearchableFields } from './user.constrant';
-import { userFilterRequest } from './user.interface';
+import { SupplierSearchableFields } from './supplier.constrant';
+import { SupplierFilterRequest } from './supplier.interface';
+
+const inertIntoDB = async (data: Supplier): Promise<Supplier> => {
+  const result = prisma.supplier.create({
+    data: data,
+  });
+  return result;
+};
 
 const getAllFromDB = async (
-  filters: userFilterRequest,
+  filters: SupplierFilterRequest,
   options: IPaginationOptions
-): Promise<IGenericResponse<User[]>> => {
+): Promise<IGenericResponse<Supplier[]>> => {
   const { page, limit, skip } = paginationHelpers.calculatePagination(options);
   const { searchTerm, ...filterData } = filters;
   const andConditons = [];
 
   if (searchTerm) {
     andConditons.push({
-      OR: userSearchableFields.map(field => ({
+      OR: SupplierSearchableFields.map(field => ({
         [field]: {
           contains: searchTerm,
           mode: 'insensitive',
@@ -37,10 +43,10 @@ const getAllFromDB = async (
     });
   }
 
-  const whereConditons: Prisma.UserWhereInput =
+  const whereConditons: Prisma.SupplierWhereInput =
     andConditons.length > 0 ? { AND: andConditons } : {};
 
-  const result = await prisma.user.findMany({
+  const result = await prisma.supplier.findMany({
     where: whereConditons,
     skip,
     take: limit,
@@ -52,7 +58,7 @@ const getAllFromDB = async (
         : undefined,
   });
 
-  const total = await prisma.user.count();
+  const total = await prisma.supplier.count();
 
   return {
     meta: {
@@ -63,47 +69,37 @@ const getAllFromDB = async (
     data: result,
   };
 };
-const getDataById = async (email: string): Promise<User | null> => {
-  const result = await prisma.user.findUnique({
+
+const getDataById = async (id: string): Promise<Supplier | null> => {
+  const result = await prisma.supplier.findUnique({
     where: {
-      email,
+      id,
     },
   });
-  if (result) {
-    result.password = '';
-  }
   return result;
 };
-const deleteById = async (email: string): Promise<User | null> => {
-  const result = await prisma.user.delete({
+const deleteById = async (id: string): Promise<Supplier | null> => {
+  const result = await prisma.supplier.delete({
     where: {
-      email,
+      id,
     },
   });
   return result;
 };
 const updateIntoDB = async (
-  email: string,
-  payload: Partial<User>
-): Promise<User> => {
-
-  const isExistUser = await prisma.user.findUnique({
+  id: string,
+  payload: Partial<Supplier>
+): Promise<Supplier> => {
+  const result = await prisma.supplier.update({
     where: {
-      email: email,
-    },
-  });
-  if (!isExistUser) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "User Not Found");
-  }
-  const result = await prisma.user.update({
-    where: {
-      email,
+      id,
     },
     data: payload,
   });
   return result;
 };
-export const UserService = {
+export const SupplierService = {
+  inertIntoDB,
   getAllFromDB,
   getDataById,
   updateIntoDB,

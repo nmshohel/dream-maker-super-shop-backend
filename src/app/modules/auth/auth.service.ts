@@ -20,7 +20,7 @@ const insertIntoDB = async (data: User): Promise<User> => {
   );
   const isExistUser = await prisma.user.findUnique({
     where: {
-      email: data.email,
+      email: data?.email,
     },
   });
   if (isExistUser) {
@@ -30,12 +30,8 @@ const insertIntoDB = async (data: User): Promise<User> => {
   let result: User | null = null;
 
   await prisma.$transaction(async (tx) => {
-    const createdUser = await tx.user.create({
+    const createdUser = await prisma.user.create({
       data: data,
-      include:{
-        addresses:true,
-        shippingAddresses:true
-      }
     });
 
     // Check if the user was created successfully

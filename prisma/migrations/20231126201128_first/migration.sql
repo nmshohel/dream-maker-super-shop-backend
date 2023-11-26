@@ -28,12 +28,12 @@ CREATE TABLE "users" (
 -- CreateTable
 CREATE TABLE "addresses" (
     "id" TEXT NOT NULL,
-    "userEmail" TEXT NOT NULL,
-    "village" TEXT,
-    "postOfficeId" TEXT,
+    "userEmail" TEXT,
+    "divisionId" TEXT,
     "thanaId" TEXT,
     "districtId" TEXT,
     "houseBuildingStreet" TEXT,
+    "postCode" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -43,12 +43,12 @@ CREATE TABLE "addresses" (
 -- CreateTable
 CREATE TABLE "shipping_addresses" (
     "id" TEXT NOT NULL,
-    "userEmail" TEXT NOT NULL,
-    "village" TEXT,
-    "postOfficeId" TEXT,
+    "userEmail" TEXT,
+    "divisionId" TEXT,
     "thanaId" TEXT,
     "districtId" TEXT,
     "houseBuildingStreet" TEXT,
+    "postCode" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -56,9 +56,20 @@ CREATE TABLE "shipping_addresses" (
 );
 
 -- CreateTable
+CREATE TABLE "division" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "division_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "district" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
+    "divisionId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -74,18 +85,6 @@ CREATE TABLE "thana" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "thana_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "post_offices" (
-    "id" TEXT NOT NULL,
-    "title" TEXT NOT NULL,
-    "postCode" TEXT NOT NULL,
-    "thanaId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "post_offices_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -150,6 +149,7 @@ CREATE TABLE "products" (
     "productTypeId" TEXT NOT NULL,
     "subCategoryId" TEXT NOT NULL,
     "categoryId" TEXT NOT NULL,
+    "supplierId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -171,9 +171,19 @@ CREATE TABLE "review" (
 -- CreateTable
 CREATE TABLE "orders" (
     "id" TEXT NOT NULL,
+    "orderId" TEXT,
     "userEmail" TEXT NOT NULL,
     "status" "Status" NOT NULL DEFAULT 'pending',
     "orderType" "OrderType" NOT NULL DEFAULT 'cashOnDelivery',
+    "totalPrice" TEXT NOT NULL,
+    "totaldiscount" TEXT NOT NULL,
+    "divisionId" TEXT,
+    "districtId" TEXT,
+    "thanaId" TEXT,
+    "postCode" TEXT,
+    "houseBuildingStreet" TEXT,
+    "contactNo" TEXT,
+    "name" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -181,9 +191,9 @@ CREATE TABLE "orders" (
 );
 
 -- CreateTable
-CREATE TABLE "ordered_books" (
+CREATE TABLE "ordered_products" (
     "id" TEXT NOT NULL,
-    "amount" TEXT,
+    "price" TEXT,
     "discount" TEXT,
     "orderId" TEXT NOT NULL,
     "productId" TEXT NOT NULL,
@@ -191,7 +201,19 @@ CREATE TABLE "ordered_books" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "ordered_books_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "ordered_products_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "suppliers" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "contactNo" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "suppliers_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -217,11 +239,14 @@ CREATE UNIQUE INDEX "addresses_userEmail_key" ON "addresses"("userEmail");
 -- CreateIndex
 CREATE UNIQUE INDEX "shipping_addresses_userEmail_key" ON "shipping_addresses"("userEmail");
 
--- AddForeignKey
-ALTER TABLE "addresses" ADD CONSTRAINT "addresses_userEmail_fkey" FOREIGN KEY ("userEmail") REFERENCES "users"("email") ON DELETE RESTRICT ON UPDATE CASCADE;
+-- CreateIndex
+CREATE UNIQUE INDEX "orders_orderId_key" ON "orders"("orderId");
 
 -- AddForeignKey
-ALTER TABLE "addresses" ADD CONSTRAINT "addresses_postOfficeId_fkey" FOREIGN KEY ("postOfficeId") REFERENCES "post_offices"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "addresses" ADD CONSTRAINT "addresses_userEmail_fkey" FOREIGN KEY ("userEmail") REFERENCES "users"("email") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "addresses" ADD CONSTRAINT "addresses_divisionId_fkey" FOREIGN KEY ("divisionId") REFERENCES "division"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "addresses" ADD CONSTRAINT "addresses_thanaId_fkey" FOREIGN KEY ("thanaId") REFERENCES "thana"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -230,10 +255,10 @@ ALTER TABLE "addresses" ADD CONSTRAINT "addresses_thanaId_fkey" FOREIGN KEY ("th
 ALTER TABLE "addresses" ADD CONSTRAINT "addresses_districtId_fkey" FOREIGN KEY ("districtId") REFERENCES "district"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "shipping_addresses" ADD CONSTRAINT "shipping_addresses_userEmail_fkey" FOREIGN KEY ("userEmail") REFERENCES "users"("email") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "shipping_addresses" ADD CONSTRAINT "shipping_addresses_userEmail_fkey" FOREIGN KEY ("userEmail") REFERENCES "users"("email") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "shipping_addresses" ADD CONSTRAINT "shipping_addresses_postOfficeId_fkey" FOREIGN KEY ("postOfficeId") REFERENCES "post_offices"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "shipping_addresses" ADD CONSTRAINT "shipping_addresses_divisionId_fkey" FOREIGN KEY ("divisionId") REFERENCES "division"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "shipping_addresses" ADD CONSTRAINT "shipping_addresses_thanaId_fkey" FOREIGN KEY ("thanaId") REFERENCES "thana"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -242,10 +267,10 @@ ALTER TABLE "shipping_addresses" ADD CONSTRAINT "shipping_addresses_thanaId_fkey
 ALTER TABLE "shipping_addresses" ADD CONSTRAINT "shipping_addresses_districtId_fkey" FOREIGN KEY ("districtId") REFERENCES "district"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "thana" ADD CONSTRAINT "thana_districtId_fkey" FOREIGN KEY ("districtId") REFERENCES "district"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "district" ADD CONSTRAINT "district_divisionId_fkey" FOREIGN KEY ("divisionId") REFERENCES "division"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "post_offices" ADD CONSTRAINT "post_offices_thanaId_fkey" FOREIGN KEY ("thanaId") REFERENCES "thana"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "thana" ADD CONSTRAINT "thana_districtId_fkey" FOREIGN KEY ("districtId") REFERENCES "district"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "categories" ADD CONSTRAINT "categories_productTypeId_fkey" FOREIGN KEY ("productTypeId") REFERENCES "product_type"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -266,6 +291,9 @@ ALTER TABLE "products" ADD CONSTRAINT "products_subCategoryId_fkey" FOREIGN KEY 
 ALTER TABLE "products" ADD CONSTRAINT "products_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "categories"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "products" ADD CONSTRAINT "products_supplierId_fkey" FOREIGN KEY ("supplierId") REFERENCES "suppliers"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "review" ADD CONSTRAINT "review_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -275,7 +303,16 @@ ALTER TABLE "review" ADD CONSTRAINT "review_productId_fkey" FOREIGN KEY ("produc
 ALTER TABLE "orders" ADD CONSTRAINT "orders_userEmail_fkey" FOREIGN KEY ("userEmail") REFERENCES "users"("email") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ordered_books" ADD CONSTRAINT "ordered_books_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "orders" ADD CONSTRAINT "orders_divisionId_fkey" FOREIGN KEY ("divisionId") REFERENCES "division"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ordered_books" ADD CONSTRAINT "ordered_books_productId_fkey" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "orders" ADD CONSTRAINT "orders_districtId_fkey" FOREIGN KEY ("districtId") REFERENCES "district"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "orders" ADD CONSTRAINT "orders_thanaId_fkey" FOREIGN KEY ("thanaId") REFERENCES "thana"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ordered_products" ADD CONSTRAINT "ordered_products_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "orders"("orderId") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ordered_products" ADD CONSTRAINT "ordered_products_productId_fkey" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

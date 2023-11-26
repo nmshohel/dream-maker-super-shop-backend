@@ -5,8 +5,8 @@ import { UserController } from './user.controller';
 const router = express.Router();
 const { ADMIN } = ENUM_USER_ROLE;
 router.get('/', UserController.getAllFromDB);
-router.get('/:id', UserController.getDataById);
-router.delete('/:id', UserController.deleteById);
-router.patch('/:id', UserController.updateIntoDB);
+router.get('/:email', UserController.getDataById);
+router.delete('/:email', UserController.deleteById);
+router.patch('/', UserController.updateIntoDB);
 
 export const UserRoutes = router;

@@ -20,8 +20,8 @@ const getAllFromDB = catchAsync(async (req, res) => {
 });
 
 const getDataById = catchAsync(async (req, res) => {
-  const id = req.params.id;
-  const result = await UserService.getDataById(id);
+  const email = req?.params?.email;
+  const result = await UserService.getDataById(email);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -30,8 +30,8 @@ const getDataById = catchAsync(async (req, res) => {
   });
 });
 const deleteById = catchAsync(async (req, res) => {
-  const id = req.params.id;
-  const result = await UserService.deleteById(id);
+  const email = req?.params?.email;
+  const result = await UserService.deleteById(email);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -40,9 +40,11 @@ const deleteById = catchAsync(async (req, res) => {
   });
 });
 const updateIntoDB = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  const email: any = req?.user?.email;
+  
   const payload = req.body;
-  const result = await UserService.updateIntoDB(id, payload);
+  
+  const result = await UserService.updateIntoDB(email, payload);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

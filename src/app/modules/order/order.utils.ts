@@ -17,7 +17,6 @@ export const findLastOrderId = async (): Promise<string | undefined> => {
 
     const lastOrderId = await findLastOrderId();
     const currentId = lastOrderId ? lastOrderId : "10000000";
-    console.log("currentId",currentId)
     let incrementedId = (parseInt(currentId) + 1);
     return incrementedId.toString();
   };
