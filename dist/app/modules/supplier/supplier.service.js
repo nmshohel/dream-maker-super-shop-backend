@@ -23,19 +23,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserService = void 0;
-const http_status_1 = __importDefault(require("http-status"));
-const ApiError_1 = __importDefault(require("../../../errors/ApiError"));
+exports.SupplierService = void 0;
 const paginationHelper_1 = require("../../../helpers/paginationHelper");
 const prisma_1 = __importDefault(require("../../../shared/prisma"));
-const user_constrant_1 = require("./user.constrant");
+const supplier_constrant_1 = require("./supplier.constrant");
+const inertIntoDB = (data) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = prisma_1.default.supplier.create({
+        data: data,
+    });
+    return result;
+});
 const getAllFromDB = (filters, options) => __awaiter(void 0, void 0, void 0, function* () {
     const { page, limit, skip } = paginationHelper_1.paginationHelpers.calculatePagination(options);
     const { searchTerm } = filters, filterData = __rest(filters, ["searchTerm"]);
     const andConditons = [];
     if (searchTerm) {
         andConditons.push({
-            OR: user_constrant_1.userSearchableFields.map(field => ({
+            OR: supplier_constrant_1.SupplierSearchableFields.map(field => ({
                 [field]: {
                     contains: searchTerm,
                     mode: 'insensitive',
@@ -53,7 +57,7 @@ const getAllFromDB = (filters, options) => __awaiter(void 0, void 0, void 0, fun
         });
     }
     const whereConditons = andConditons.length > 0 ? { AND: andConditons } : {};
-    const result = yield prisma_1.default.user.findMany({
+    const result = yield prisma_1.default.supplier.findMany({
         where: whereConditons,
         skip,
         take: limit,
@@ -63,7 +67,7 @@ const getAllFromDB = (filters, options) => __awaiter(void 0, void 0, void 0, fun
             }
             : undefined,
     });
-    const total = yield prisma_1.default.user.count();
+    const total = yield prisma_1.default.supplier.count();
     return {
         meta: {
             total,
@@ -73,43 +77,33 @@ const getAllFromDB = (filters, options) => __awaiter(void 0, void 0, void 0, fun
         data: result,
     };
 });
-const getDataById = (email) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield prisma_1.default.user.findUnique({
+const getDataById = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma_1.default.supplier.findUnique({
         where: {
-            email,
-        },
-    });
-    if (result) {
-        result.password = '';
-    }
-    return result;
-});
-const deleteById = (email) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield prisma_1.default.user.delete({
-        where: {
-            email,
+            id,
         },
     });
     return result;
 });
-const updateIntoDB = (email, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const isExistUser = yield prisma_1.default.user.findUnique({
+const deleteById = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma_1.default.supplier.delete({
         where: {
-            email: email,
+            id,
         },
     });
-    if (!isExistUser) {
-        throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, "User Not Found");
-    }
-    const result = yield prisma_1.default.user.update({
+    return result;
+});
+const updateIntoDB = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma_1.default.supplier.update({
         where: {
-            email,
+            id,
         },
         data: payload,
     });
     return result;
 });
-exports.UserService = {
+exports.SupplierService = {
+    inertIntoDB,
     getAllFromDB,
     getDataById,
     updateIntoDB,

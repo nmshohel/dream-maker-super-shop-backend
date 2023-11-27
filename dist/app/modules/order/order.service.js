@@ -29,66 +29,110 @@ const ApiError_1 = __importDefault(require("../../../errors/ApiError"));
 const paginationHelper_1 = require("../../../helpers/paginationHelper");
 const prisma_1 = __importDefault(require("../../../shared/prisma"));
 const order_constrant_1 = require("./order.constrant");
-const insertIntoDB = (data, requestUser) => __awaiter(void 0, void 0, void 0, function* () {
-    const reqUser = yield prisma_1.default.user.findFirst({
+const order_utils_1 = require("./order.utils");
+const insertIntoDB = (userData, requestUser) => __awaiter(void 0, void 0, void 0, function* () {
+    const { product } = userData, orderType = __rest(userData, ["product"]);
+    const data = product;
+    const generatedOrderId = yield (0, order_utils_1.generateOrderId)();
+    let userOrderType = orderType.orderType;
+    userOrderType = userOrderType ? userOrderType : "cashOnDelivery";
+    const authUser = yield prisma_1.default.user.findFirst({
         where: {
             email: requestUser === null || requestUser === void 0 ? void 0 : requestUser.email,
         },
     });
-    if (!reqUser) {
+    if (!authUser) {
         throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, 'User Not Found');
     }
+    let userShippingAddress = yield prisma_1.default.shippingAddress.findFirst({
+        where: {
+            userEmail: requestUser === null || requestUser === void 0 ? void 0 : requestUser.email,
+        }
+    });
+    if (!(userShippingAddress === null || userShippingAddress === void 0 ? void 0 : userShippingAddress.districtId) ||
+        !(userShippingAddress === null || userShippingAddress === void 0 ? void 0 : userShippingAddress.postCode) ||
+        !(userShippingAddress === null || userShippingAddress === void 0 ? void 0 : userShippingAddress.divisionId) ||
+        !(userShippingAddress === null || userShippingAddress === void 0 ? void 0 : userShippingAddress.thanaId) ||
+        !(userShippingAddress === null || userShippingAddress === void 0 ? void 0 : userShippingAddress.houseBuildingStreet)) {
+        throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, "User Shipping Address Not found");
+    }
     let userOrder;
+    let totalPrice = 0;
+    let totalDiscount = 0;
     let userOrderedProduct = [];
     yield prisma_1.default.$transaction((transactionClient) => __awaiter(void 0, void 0, void 0, function* () {
-        userOrder = yield transactionClient.order.findFirst({
-            where: {
-                userEmail: reqUser.email,
+        if (userOrderType === undefined) {
+            throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, "undidiend");
+        }
+        userOrder = yield transactionClient.order.create({
+            data: {
+                userEmail: authUser === null || authUser === void 0 ? void 0 : authUser.email,
+                orderType: userOrderType,
+                orderId: generatedOrderId,
+                divisionId: userShippingAddress === null || userShippingAddress === void 0 ? void 0 : userShippingAddress.divisionId,
+                districtId: userShippingAddress === null || userShippingAddress === void 0 ? void 0 : userShippingAddress.districtId,
+                thanaId: userShippingAddress === null || userShippingAddress === void 0 ? void 0 : userShippingAddress.thanaId,
+                postCode: userShippingAddress === null || userShippingAddress === void 0 ? void 0 : userShippingAddress.postCode,
+                houseBuildingStreet: userShippingAddress === null || userShippingAddress === void 0 ? void 0 : userShippingAddress.houseBuildingStreet,
+                contactNo: authUser === null || authUser === void 0 ? void 0 : authUser.contactNo,
+                name: authUser.name,
+                totalPrice: totalPrice.toString(),
+                totaldiscount: totalDiscount.toString(), // Add this line
             },
         });
-        if (!userOrder) {
-            userOrder = yield transactionClient.order.create({
-                data: {
-                    userEmail: reqUser.email,
-                },
-            });
-        }
+        //start loop
         for (let index = 0; index < data.length; index++) {
-            const existingOrderedBook = yield transactionClient.orderedProduct.findFirst({
+            const product = yield transactionClient.product.findFirst({
                 where: {
-                    orderId: userOrder.id,
+                    id: data[index].productId
+                }
+            });
+            if (!product) {
+                throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, "Product Not Found");
+            }
+            //sum of total price and total discount
+            if (product.discount) {
+                totalDiscount = totalDiscount + (parseInt(product.discount) * parseInt(data[index].quantity));
+            }
+            if (product.price) {
+                totalPrice = totalPrice + (parseInt(product.price) * parseInt(data[index].quantity));
+            }
+            const newOrderedProduct = yield transactionClient.orderedProduct.create({
+                data: {
+                    orderId: userOrder.orderId,
                     productId: data[index].productId,
+                    quantity: String(data[index].quantity),
+                    price: product.price,
+                    discount: product.discount
                 },
             });
-            if (existingOrderedBook) {
-                throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, 'Order already submited');
+            //   for decrease order quantity
+            const productsQuantity = yield transactionClient.product.findFirst({
+                where: {
+                    id: newOrderedProduct.productId,
+                },
+            });
+            const products = yield transactionClient.product.update({
+                where: {
+                    id: newOrderedProduct.productId,
+                },
+                data: {
+                    quantity: (Number(productsQuantity === null || productsQuantity === void 0 ? void 0 : productsQuantity.quantity) - Number(newOrderedProduct.quantity)).toString(),
+                },
+            });
+            userOrderedProduct.push(newOrderedProduct);
+        } //end loop
+        userOrder = yield transactionClient.order.update({
+            where: {
+                id: userOrder === null || userOrder === void 0 ? void 0 : userOrder.id
+            },
+            data: {
+                totaldiscount: totalDiscount.toString(),
+                totalPrice: totalPrice.toString(),
             }
-            else {
-                const newOrderedBook = yield transactionClient.orderedProduct.create({
-                    data: {
-                        orderId: userOrder.id,
-                        productId: data[index].productId,
-                        quantity: String(data[index].quantity),
-                    },
-                });
-                const booksQuantity = yield transactionClient.product.findFirst({
-                    where: {
-                        id: newOrderedBook.productId,
-                    },
-                });
-                const products = yield transactionClient.product.update({
-                    where: {
-                        id: newOrderedBook.productId,
-                    },
-                    data: {
-                        quantity: (Number(booksQuantity === null || booksQuantity === void 0 ? void 0 : booksQuantity.quantity) - Number(newOrderedBook.quantity)).toString(),
-                    },
-                });
-                userOrderedProduct.push(newOrderedBook);
-            }
-        }
-    }));
-    return { userOrder, userOrderedBook: userOrderedProduct };
+        });
+    })); //end transction
+    return { userOrder, userOrderedProduct: userOrderedProduct };
 });
 const getAllFromDB = (filters, options) => __awaiter(void 0, void 0, void 0, function* () {
     const { page, limit, skip } = paginationHelper_1.paginationHelpers.calculatePagination(options);

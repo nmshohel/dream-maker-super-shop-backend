@@ -10,7 +10,10 @@ const create = zod_1.z.object({
         quantity: zod_1.z.string({
             required_error: 'Quantity is required',
         }),
-    })),
+    })).refine(data => Array.isArray(data), {
+        message: 'Expected array, received object',
+    }),
+    orderType: zod_1.z.string({ required_error: "Order type is required" }),
 });
 exports.OrderValidation = {
     create,

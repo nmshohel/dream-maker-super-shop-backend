@@ -12,60 +12,67 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserController = void 0;
+exports.SupplierController = void 0;
 const http_status_1 = __importDefault(require("http-status"));
 const catchAsync_1 = __importDefault(require("../../../shared/catchAsync"));
 const pick_1 = __importDefault(require("../../../shared/pick"));
 const sendResponse_1 = __importDefault(require("../../../shared/sendResponse"));
-const user_constrant_1 = require("./user.constrant");
-const user_service_1 = require("./user.service");
-const getAllFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const filters = (0, pick_1.default)(req.query, user_constrant_1.userFilterableFields);
-    const options = (0, pick_1.default)(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
-    const result = yield user_service_1.UserService.getAllFromDB(filters, options);
+const supplier_constrant_1 = require("./supplier.constrant");
+const supplier_service_1 = require("./supplier.service");
+const insertIntoDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield supplier_service_1.SupplierService.inertIntoDB(req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Users retrieved successfully',
+        message: 'Category Created Successfully',
+        data: result,
+    });
+}));
+const getAllFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const filters = (0, pick_1.default)(req.query, supplier_constrant_1.SupplierFilterableFields);
+    const options = (0, pick_1.default)(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
+    const result = yield supplier_service_1.SupplierService.getAllFromDB(filters, options);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Supplier fetched successfully',
         meta: result.meta,
         data: result.data,
     });
 }));
 const getDataById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const email = (_a = req === null || req === void 0 ? void 0 : req.params) === null || _a === void 0 ? void 0 : _a.email;
-    const result = yield user_service_1.UserService.getDataById(email);
+    const id = req.params.id;
+    const result = yield supplier_service_1.SupplierService.getDataById(id);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'User fetched successfully',
+        message: 'Supplier fetched successfully',
         data: result,
     });
 }));
 const deleteById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _b;
-    const email = (_b = req === null || req === void 0 ? void 0 : req.params) === null || _b === void 0 ? void 0 : _b.email;
-    const result = yield user_service_1.UserService.deleteById(email);
+    const id = req.params.id;
+    const result = yield supplier_service_1.SupplierService.deleteById(id);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'User Deleted successfully',
+        message: 'Supplier Deleted successfully',
         data: result,
     });
 }));
 const updateIntoDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _c;
-    const email = (_c = req === null || req === void 0 ? void 0 : req.user) === null || _c === void 0 ? void 0 : _c.email;
+    const { id } = req.params;
     const payload = req.body;
-    const result = yield user_service_1.UserService.updateIntoDB(email, payload);
+    const result = yield supplier_service_1.SupplierService.updateIntoDB(id, payload);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'User updated successfully',
+        message: 'Supplier updated successfully',
         data: result,
     });
 }));
-exports.UserController = {
+exports.SupplierController = {
+    insertIntoDB,
     getAllFromDB,
     getDataById,
     updateIntoDB,

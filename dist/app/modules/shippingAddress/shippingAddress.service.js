@@ -18,9 +18,16 @@ const http_status_1 = __importDefault(require("http-status"));
 const ApiError_1 = __importDefault(require("../../../errors/ApiError"));
 const prisma_1 = __importDefault(require("../../../shared/prisma"));
 const updateIntoDB = (email, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!email) {
-        throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, "User Not Found");
+    // Check if the record exists
+    const existingRecord = yield prisma_1.default.shippingAddress.findUnique({
+        where: {
+            userEmail: email,
+        },
+    });
+    if (!existingRecord) {
+        throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, "User not found");
     }
+    // If the record exists, proceed with the update
     const result = yield prisma_1.default.shippingAddress.update({
         where: {
             userEmail: email,
@@ -40,7 +47,6 @@ const getDataByEmail = (email) => __awaiter(void 0, void 0, void 0, function* ()
         include: {
             districts: true,
             thanas: true,
-            postOffices: true,
             users: true
         }
     });

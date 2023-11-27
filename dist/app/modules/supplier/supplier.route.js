@@ -1,0 +1,20 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SupplierRoutes = void 0;
+const express_1 = __importDefault(require("express"));
+const user_1 = require("../../../enums/user");
+const auth_1 = __importDefault(require("../../middlewares/auth"));
+const validateRequest_1 = __importDefault(require("../../middlewares/validateRequest"));
+const supplier_controller_1 = require("./supplier.controller");
+const supplier_validation_1 = require("./supplier.validation");
+const router = express_1.default.Router();
+const { ADMIN, CUSTOMER } = user_1.ENUM_USER_ROLE;
+router.post('/create-supplier', (0, validateRequest_1.default)(supplier_validation_1.SupplierValidation.create), (0, auth_1.default)(ADMIN), supplier_controller_1.SupplierController.insertIntoDB);
+router.get('/', supplier_controller_1.SupplierController.getAllFromDB);
+router.get('/:id', (0, auth_1.default)(ADMIN, CUSTOMER), supplier_controller_1.SupplierController.getDataById);
+router.delete('/:id', (0, auth_1.default)(ADMIN), supplier_controller_1.SupplierController.deleteById);
+router.patch('/:id', (0, auth_1.default)(ADMIN), supplier_controller_1.SupplierController.updateIntoDB);
+exports.SupplierRoutes = router;

@@ -23,7 +23,7 @@ const insertIntoDB = (data) => __awaiter(void 0, void 0, void 0, function* () {
     data.password = yield bcrypt_1.default.hash(data.password, Number(config_1.default.jwt.salt_round));
     const isExistUser = yield prisma_1.default.user.findUnique({
         where: {
-            email: data.email,
+            email: data === null || data === void 0 ? void 0 : data.email,
         },
     });
     if (isExistUser) {
@@ -31,12 +31,8 @@ const insertIntoDB = (data) => __awaiter(void 0, void 0, void 0, function* () {
     }
     let result = null;
     yield prisma_1.default.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
-        const createdUser = yield tx.user.create({
+        const createdUser = yield prisma_1.default.user.create({
             data: data,
-            include: {
-                addresses: true,
-                shippingAddresses: true
-            }
         });
         // Check if the user was created successfully
         if (!createdUser) {

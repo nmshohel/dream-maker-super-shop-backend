@@ -14,6 +14,7 @@ const product_route_1 = require("../modules/product/product.route");
 const productType_route_1 = require("../modules/productType/productType.route");
 const shippingAddress_route_1 = require("../modules/shippingAddress/shippingAddress.route");
 const subCategory_route_1 = require("../modules/subCategory/subCategory.route");
+const supplier_route_1 = require("../modules/supplier/supplier.route");
 const user_route_1 = require("../modules/user/user.route");
 const router = express_1.default.Router();
 const moduleRoutes = [
@@ -61,6 +62,10 @@ const moduleRoutes = [
     {
         path: '/shipping-address',
         route: shippingAddress_route_1.ShippingAddressRoutes,
+    },
+    {
+        path: '/suppliers',
+        route: supplier_route_1.SupplierRoutes,
     },
 ];
 moduleRoutes.forEach(route => router.use(route.path, route.route));

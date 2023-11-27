@@ -10,6 +10,8 @@ const auth_controller_1 = require("./auth.controller");
 const auth_validation_1 = require("./auth.validation");
 const router = express_1.default.Router();
 router.post('/signin', auth_controller_1.AuthController.loginUser);
-router.post('/signup', (0, validateRequest_1.default)(auth_validation_1.AuthValidation.signUpZodSchema), auth_controller_1.AuthController.insertIntoDB);
+router.post('/signup', 
+// validateRequest(AuthValidation.signUpZodSchema),
+auth_controller_1.AuthController.insertIntoDB);
 router.post('/refresh-token', (0, validateRequest_1.default)(auth_validation_1.AuthValidation.refreshTokenZodSchema), auth_controller_1.AuthController.refreshToken);
 exports.AuthRoutes = router;

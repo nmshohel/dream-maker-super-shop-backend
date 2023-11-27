@@ -35,6 +35,9 @@ const create = zod_1.z.object({
         categoryId: zod_1.z.string({
             required_error: 'categoryId is required',
         }),
+        supplierId: zod_1.z.string({
+            required_error: 'supplierId is required',
+        }),
     }),
 });
 exports.ProductValidation = {

@@ -66,7 +66,10 @@ const insertIntoDB = async (
           postCode:userShippingAddress?.postCode,
           houseBuildingStreet:userShippingAddress?.houseBuildingStreet,
           contactNo:authUser?.contactNo,
-          name:authUser.name
+          name:authUser.name,
+          totalPrice: totalPrice.toString(), // Add this line
+          totaldiscount: totalDiscount.toString(), // Add this line
+
         },
       });
 

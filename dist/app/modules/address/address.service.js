@@ -39,7 +39,6 @@ const getDataByEmail = (email) => __awaiter(void 0, void 0, void 0, function* ()
         include: {
             districts: true,
             thanas: true,
-            postOffices: true,
             users: true
         }
     });

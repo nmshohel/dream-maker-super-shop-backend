@@ -19,7 +19,7 @@ const sendResponse_1 = __importDefault(require("../../../shared/sendResponse"));
 const shippingAddress_service_1 = require("./shippingAddress.service");
 const updateAddress = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const email = (_a = req === null || req === void 0 ? void 0 : req.params) === null || _a === void 0 ? void 0 : _a.email;
+    const email = (_a = req === null || req === void 0 ? void 0 : req.user) === null || _a === void 0 ? void 0 : _a.email;
     const payload = req.body;
     const result = yield shippingAddress_service_1.ShippingAddressService.updateIntoDB(email, payload);
     (0, sendResponse_1.default)(res, {
@@ -31,7 +31,8 @@ const updateAddress = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, 
 }));
 const getByEmail = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _b;
-    const email = (_b = req === null || req === void 0 ? void 0 : req.params) === null || _b === void 0 ? void 0 : _b.email;
+    const email = (_b = req === null || req === void 0 ? void 0 : req.user) === null || _b === void 0 ? void 0 : _b.email;
+    console.log(email);
     const result = yield shippingAddress_service_1.ShippingAddressService.getDataByEmail(email);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,

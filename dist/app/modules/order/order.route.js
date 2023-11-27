@@ -7,12 +7,12 @@ exports.OrderRoutes = void 0;
 const express_1 = __importDefault(require("express"));
 const user_1 = require("../../../enums/user");
 const auth_1 = __importDefault(require("../../middlewares/auth"));
-const validateRequest_1 = __importDefault(require("../../middlewares/validateRequest"));
 const order_controller_1 = require("./order.controller");
-const order_validation_1 = require("./order.validation");
 const router = express_1.default.Router();
 const { ADMIN, CUSTOMER } = user_1.ENUM_USER_ROLE;
-router.post('/create-order', (0, validateRequest_1.default)(order_validation_1.OrderValidation.create), (0, auth_1.default)(CUSTOMER, ADMIN), order_controller_1.OrderController.insertIntoDB);
+router.post('/create-order', 
+// validateRequest(OrderValidation.create),
+(0, auth_1.default)(CUSTOMER, ADMIN), order_controller_1.OrderController.insertIntoDB);
 router.get('/', (0, auth_1.default)(ADMIN), order_controller_1.OrderController.getAllFromDB);
 router.get('/my-order', (0, auth_1.default)(ADMIN, CUSTOMER), order_controller_1.OrderController.getAllFromDBByCustomer);
 router.get('/:id', (0, auth_1.default)(ADMIN, CUSTOMER), order_controller_1.OrderController.getDataById);

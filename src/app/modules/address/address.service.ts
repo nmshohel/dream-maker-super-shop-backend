@@ -35,7 +35,6 @@ const getDataByEmail = async (email: string): Promise<Address | null> => {
       include:{
         districts:true,
         thanas:true,
-        postOffices:true,
         users:true
       }
     });
