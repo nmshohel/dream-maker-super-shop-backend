@@ -31,10 +31,10 @@ const prisma_1 = __importDefault(require("../../../shared/prisma"));
 const order_constrant_1 = require("./order.constrant");
 const order_utils_1 = require("./order.utils");
 const insertIntoDB = (userData, requestUser) => __awaiter(void 0, void 0, void 0, function* () {
-    const { product } = userData, orderType = __rest(userData, ["product"]);
+    const { product } = userData, others = __rest(userData, ["product"]);
     const data = product;
     const generatedOrderId = yield (0, order_utils_1.generateOrderId)();
-    let userOrderType = orderType.orderType;
+    let userOrderType = others.orderType;
     userOrderType = userOrderType ? userOrderType : "cashOnDelivery";
     const authUser = yield prisma_1.default.user.findFirst({
         where: {
@@ -49,33 +49,36 @@ const insertIntoDB = (userData, requestUser) => __awaiter(void 0, void 0, void 0
             userEmail: requestUser === null || requestUser === void 0 ? void 0 : requestUser.email,
         }
     });
-    if (!(userShippingAddress === null || userShippingAddress === void 0 ? void 0 : userShippingAddress.districtId) ||
-        !(userShippingAddress === null || userShippingAddress === void 0 ? void 0 : userShippingAddress.postCode) ||
-        !(userShippingAddress === null || userShippingAddress === void 0 ? void 0 : userShippingAddress.divisionId) ||
-        !(userShippingAddress === null || userShippingAddress === void 0 ? void 0 : userShippingAddress.thanaId) ||
-        !(userShippingAddress === null || userShippingAddress === void 0 ? void 0 : userShippingAddress.houseBuildingStreet)) {
-        throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, "User Shipping Address Not found");
-    }
+    // if(!userShippingAddress?.districtId ||
+    //    !userShippingAddress?.postCode ||
+    //     !userShippingAddress?.divisionId ||
+    //      !userShippingAddress?.thanaId ||
+    //      !userShippingAddress?.houseBuildingStreet 
+    //   )
+    // {
+    //   throw new ApiError(httpStatus.BAD_REQUEST, "User Shipping Address Not found")
+    // }
     let userOrder;
     let totalPrice = 0;
     let totalDiscount = 0;
     let userOrderedProduct = [];
     yield prisma_1.default.$transaction((transactionClient) => __awaiter(void 0, void 0, void 0, function* () {
-        if (userOrderType === undefined) {
-            throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, "undidiend");
-        }
+        // if(userOrderType===undefined)
+        // {
+        //   throw new ApiError(httpStatus.BAD_REQUEST, "undidiend")
+        // }
         userOrder = yield transactionClient.order.create({
             data: {
-                userEmail: authUser === null || authUser === void 0 ? void 0 : authUser.email,
+                userEmail: others === null || others === void 0 ? void 0 : others.email,
                 orderType: userOrderType,
                 orderId: generatedOrderId,
-                divisionId: userShippingAddress === null || userShippingAddress === void 0 ? void 0 : userShippingAddress.divisionId,
-                districtId: userShippingAddress === null || userShippingAddress === void 0 ? void 0 : userShippingAddress.districtId,
-                thanaId: userShippingAddress === null || userShippingAddress === void 0 ? void 0 : userShippingAddress.thanaId,
-                postCode: userShippingAddress === null || userShippingAddress === void 0 ? void 0 : userShippingAddress.postCode,
-                houseBuildingStreet: userShippingAddress === null || userShippingAddress === void 0 ? void 0 : userShippingAddress.houseBuildingStreet,
-                contactNo: authUser === null || authUser === void 0 ? void 0 : authUser.contactNo,
-                name: authUser.name,
+                divisionId: others === null || others === void 0 ? void 0 : others.divisionId,
+                districtId: others === null || others === void 0 ? void 0 : others.districtId,
+                thanaId: others === null || others === void 0 ? void 0 : others.thanaId,
+                postCode: others === null || others === void 0 ? void 0 : others.postCode,
+                houseBuildingStreet: others === null || others === void 0 ? void 0 : others.houseBuildingStreet,
+                contactNo: others === null || others === void 0 ? void 0 : others.contactNo,
+                name: others.name,
                 totalPrice: totalPrice.toString(),
                 totaldiscount: totalDiscount.toString(), // Add this line
             },
@@ -129,6 +132,28 @@ const insertIntoDB = (userData, requestUser) => __awaiter(void 0, void 0, void 0
             data: {
                 totaldiscount: totalDiscount.toString(),
                 totalPrice: totalPrice.toString(),
+            }
+        });
+        const shippingAddress = yield transactionClient.shippingAddress.update({
+            where: {
+                userEmail: requestUser.email
+            },
+            data: {
+                userEmail: others.email,
+                divisionId: others.divisionId,
+                districtId: others.districtId,
+                thanaId: others.thanaId,
+                houseBuildingStreet: others.houseBuildingStreet,
+                postCode: others.postCode
+            }
+        });
+        const userDataUpdate = yield transactionClient.user.update({
+            where: {
+                email: requestUser.email
+            },
+            data: {
+                name: others.name,
+                contactNo: others.contactNo,
             }
         });
     })); //end transction
@@ -210,7 +235,7 @@ const getAllFromDBByCustomer = (filters, options, requestUser) => __awaiter(void
         where: Object.assign(Object.assign({}, whereConditions), { userEmail: requestUser.email }),
         skip,
         take: limit,
-        include: { OrderedProduct: true },
+        include: { OrderedProduct: true, user: true, },
         orderBy: options.sortBy && options.sortOrder
             ? {
                 [options.sortBy]: options.sortOrder,
@@ -235,7 +260,7 @@ const getDataById = (id, requestUser) => __awaiter(void 0, void 0, void 0, funct
     console.log('requestUser', requestUser);
     const result = yield prisma_1.default.order.findUnique({
         where: {
-            id,
+            orderId: id
         },
         include: {
             OrderedProduct: true,
@@ -246,16 +271,20 @@ const getDataById = (id, requestUser) => __awaiter(void 0, void 0, void 0, funct
 const deleteById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield prisma_1.default.order.delete({
         where: {
-            id,
+            orderId: id
         },
+        include: {
+            OrderedProduct: true
+        }
     });
     return result;
 });
 const updateIntoDB = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield prisma_1.default.order.update({
         where: {
-            id,
+            orderId: id
         },
+        include: { OrderedProduct: true },
         data: payload,
     });
     return result;

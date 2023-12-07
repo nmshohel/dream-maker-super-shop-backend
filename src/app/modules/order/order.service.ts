@@ -9,17 +9,14 @@ import prisma from '../../../shared/prisma';
 import { OrderSearchableFields } from './order.constrant';
 import { OrderFilterRequest } from './order.interface';
 import { generateOrderId } from './order.utils';
-
 const insertIntoDB = async (
   userData: any,
   requestUser: { email: string; role: string }
 ): Promise<any> => {
-
-  const {product,...orderType}=userData
+  const {product,...others}=userData
   const data=product
   const generatedOrderId=await generateOrderId()
-
-  let userOrderType = orderType.orderType;
+  let userOrderType = others.orderType;
   userOrderType = userOrderType?userOrderType: "cashOnDelivery";
   const authUser = await prisma.user.findFirst({
     where: {
@@ -34,16 +31,16 @@ const insertIntoDB = async (
       userEmail:requestUser?.email,
     }
   })
-  if(!userShippingAddress?.districtId ||
-     !userShippingAddress?.postCode ||
-      !userShippingAddress?.divisionId ||
-       !userShippingAddress?.thanaId ||
-       !userShippingAddress?.houseBuildingStreet 
+  // if(!userShippingAddress?.districtId ||
+  //    !userShippingAddress?.postCode ||
+  //     !userShippingAddress?.divisionId ||
+  //      !userShippingAddress?.thanaId ||
+  //      !userShippingAddress?.houseBuildingStreet 
 
-    )
-  {
-    throw new ApiError(httpStatus.BAD_REQUEST, "User Shipping Address Not found")
-  }
+  //   )
+  // {
+  //   throw new ApiError(httpStatus.BAD_REQUEST, "User Shipping Address Not found")
+  // }
   let userOrder: any | undefined;
   let totalPrice:number=0
   let totalDiscount:number=0
@@ -51,22 +48,22 @@ const insertIntoDB = async (
     [];
   await prisma.$transaction(async transactionClient => {
     
-          if(userOrderType===undefined)
-          {
-            throw new ApiError(httpStatus.BAD_REQUEST, "undidiend")
-          }
+          // if(userOrderType===undefined)
+          // {
+          //   throw new ApiError(httpStatus.BAD_REQUEST, "undidiend")
+          // }
       userOrder = await transactionClient.order.create({
         data: {
-          userEmail: authUser?.email,
+          userEmail: others?.email,
           orderType:userOrderType,
           orderId:generatedOrderId,
-          divisionId:userShippingAddress?.divisionId,
-          districtId:userShippingAddress?.districtId,
-          thanaId:userShippingAddress?.thanaId,
-          postCode:userShippingAddress?.postCode,
-          houseBuildingStreet:userShippingAddress?.houseBuildingStreet,
-          contactNo:authUser?.contactNo,
-          name:authUser.name,
+          divisionId:others?.divisionId,
+          districtId:others?.districtId,
+          thanaId:others?.thanaId,
+          postCode:others?.postCode,
+          houseBuildingStreet:others?.houseBuildingStreet,
+          contactNo:others?.contactNo,
+          name:others.name,
           totalPrice: totalPrice.toString(), // Add this line
           totaldiscount: totalDiscount.toString(), // Add this line
 
@@ -140,6 +137,29 @@ const insertIntoDB = async (
 
     })
 
+    const shippingAddress=await transactionClient.shippingAddress.update({
+      where:{
+        userEmail:requestUser.email
+      },
+      data:{
+        userEmail:others.email,
+        divisionId:others.divisionId,
+        districtId:others.districtId,
+        thanaId:others.thanaId,
+        houseBuildingStreet:others.houseBuildingStreet,
+        postCode:others.postCode
+      }
+    })
+    const userDataUpdate=await transactionClient.user.update({
+      where:{
+        email:requestUser.email
+      },
+      data:{
+        name:others.name,
+        contactNo:others.contactNo,
+      }
+    })
+
 
 
   });//end transction
@@ -209,6 +229,15 @@ const getAllFromDBByCustomer = async (
   options: IPaginationOptions,
   requestUser: any
 ): Promise<IGenericResponse<Order[]>> => {
+  const order=await prisma.order.findFirst({
+    where:{
+      userEmail:requestUser?.email
+    }
+  })
+  if(!order)
+  {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Order Not Found")
+  }
   const { page, limit, skip } = paginationHelpers.calculatePagination(options);
   const { searchTerm, ...filterData } = filters;
   const andConditions = [];
@@ -241,7 +270,7 @@ const getAllFromDBByCustomer = async (
     where: { ...whereConditions, userEmail: requestUser.email },
     skip,
     take: limit,
-    include: { OrderedProduct: true },
+    include: { OrderedProduct: true,user:true, },
     orderBy:
       options.sortBy && options.sortOrder
         ? {
@@ -270,10 +299,19 @@ const getDataById = async (
   id: string,
   requestUser: any
 ): Promise<Order | null> => {
+  const order=await prisma.order.findFirst({
+    where:{
+      orderId:id
+    }
+  })
+  if(!order)
+  {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Order Not Found")
+  }
   console.log('requestUser', requestUser);
   const result = await prisma.order.findUnique({
     where: {
-      id,
+      orderId:id
     },
     include: {
       OrderedProduct: true,
@@ -282,21 +320,63 @@ const getDataById = async (
   return result;
 };
 const deleteById = async (id: string): Promise<Order | null> => {
-  const result = await prisma.order.delete({
+  const order = await prisma.order.findFirst({
     where: {
-      id,
-    },
+      orderId: id
+    }
   });
-  return result;
+
+  if (!order) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Order Not Found");
+  }
+
+  let deletedOrder;
+
+  await prisma.$transaction(async (tc) => {
+    // Delete associated orderedProduct records first
+    const deletedOrderProduct = await prisma.orderedProduct.deleteMany({
+      where: {
+        orderId: id
+      },
+    });
+
+    // Now, delete the order
+    deletedOrder = await prisma.order.delete({
+      where: {
+        orderId: id
+      },
+      include: {
+        OrderedProduct: true,
+        division:true,
+        district:true,
+        thana:true
+
+      }
+    });
+  });
+
+  return deletedOrder!;
 };
+
+
 const updateIntoDB = async (
   id: string,
   payload: Partial<Order>
 ): Promise<Order> => {
+  const order=await prisma.order.findFirst({
+    where:{
+      orderId:id
+    }
+  })
+  if(!order)
+  {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Order Not Found")
+  }
   const result = await prisma.order.update({
     where: {
-      id,
+      orderId:id
     },
+    include:{OrderedProduct:true},
     data: payload,
   });
   return result;

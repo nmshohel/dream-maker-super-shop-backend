@@ -22,7 +22,6 @@ const insertIntoDB: RequestHandler = catchAsync(async (req, res) => {
 const getAllFromDB = catchAsync(async (req, res) => {
   const filters = pick(req.query, OrderFilterableFields);
   const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
-
   const result = await OrderService.getAllFromDB(filters, options);
   sendResponse(res, {
     statusCode: httpStatus.OK,

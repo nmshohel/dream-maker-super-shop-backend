@@ -8,7 +8,7 @@ import { AddressService } from './address.service';
 
 
 const updateAddress = catchAsync(async (req: Request, res: Response) => {
-const email=req?.params?.email
+const email=req?.user?.email
 const payload=req.body;
 const result=await AddressService.updateIntoDB(email,payload)
   sendResponse(res, {
@@ -20,7 +20,7 @@ const result=await AddressService.updateIntoDB(email,payload)
 });
 
 const getByEmail = catchAsync(async (req: Request, res: Response) => {
-const email=req?.params?.email
+  const email=req?.user?.email
 const result=await AddressService.getDataByEmail(email)
   sendResponse(res, {
     statusCode: httpStatus.OK,

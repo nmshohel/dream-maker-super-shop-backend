@@ -29,8 +29,19 @@ const getDataById = catchAsync(async (req, res) => {
     data: result,
   });
 });
+const getSingleUser = catchAsync(async (req, res) => {
+  const requestUserEmail = req?.user;
+  const email=requestUserEmail?.email
+  const result = await UserService.getSingleUser(email);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'User fetched successfully',
+    data: result,
+  });
+});
 const deleteById = catchAsync(async (req, res) => {
-  const email = req?.params?.email;
+  const email = req?.body?.email;
   const result = await UserService.deleteById(email);
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -40,9 +51,10 @@ const deleteById = catchAsync(async (req, res) => {
   });
 });
 const updateIntoDB = catchAsync(async (req, res) => {
-  const email: any = req?.user?.email;
-  
-  const payload = req.body;
+  const requestUser = req?.user;
+  const email=requestUser?.email
+  console.log("email",email)
+  const payload = req?.body;
   
   const result = await UserService.updateIntoDB(email, payload);
   sendResponse(res, {
@@ -57,4 +69,5 @@ export const UserController = {
   getDataById,
   updateIntoDB,
   deleteById,
+  getSingleUser
 };

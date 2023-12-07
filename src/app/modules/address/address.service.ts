@@ -19,6 +19,12 @@ const updateIntoDB = async (
       userEmail:email,
     },
     data: payload,
+    include:{
+      divisions:true,
+      districts:true,
+      thanas:true,
+      users:true
+    }
   });
   return result;
 };
@@ -33,6 +39,7 @@ const getDataByEmail = async (email: string): Promise<Address | null> => {
         userEmail:email,
       },
       include:{
+        divisions:true,
         districts:true,
         thanas:true,
         users:true

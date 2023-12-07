@@ -74,6 +74,17 @@ const getDataById = async (email: string): Promise<User | null> => {
   }
   return result;
 };
+const getSingleUser = async (email: string): Promise<User | null> => {
+  const result = await prisma.user.findFirst({
+    where: {
+      email,
+    },
+  });
+  if (result) {
+    result.password = '';
+  }
+  return result;
+};
 const deleteById = async (email: string): Promise<User | null> => {
   const result = await prisma.user.delete({
     where: {
@@ -87,7 +98,7 @@ const updateIntoDB = async (
   payload: Partial<User>
 ): Promise<User> => {
 
-  const isExistUser = await prisma.user.findUnique({
+  const isExistUser = await prisma.user.findFirst({
     where: {
       email: email,
     },
@@ -108,4 +119,5 @@ export const UserService = {
   getDataById,
   updateIntoDB,
   deleteById,
+  getSingleUser
 };
